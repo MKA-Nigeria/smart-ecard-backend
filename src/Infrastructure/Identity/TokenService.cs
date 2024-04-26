@@ -30,7 +30,7 @@ internal class TokenService : ITokenService
     public async Task<TokenResponse> GetTokenAsync(TokenRequest request, CancellationToken cancellationToken)
     {
 
-        if (await _userManager.FindByEmailAsync(request.Email.Trim().Normalize()) is not { } user)
+        if (await _userManager.FindByNameAsync(request.UserName.Trim().Normalize()) is not { } user)
         {
             throw new UnauthorizedException("Authentication Failed.");
         }

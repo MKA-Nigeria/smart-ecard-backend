@@ -11,7 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Template.Infrastructure.Auth;
+using Infrastructure.Auth;
 
 [assembly: InternalsVisibleTo("Infrastructure.Test")]
 

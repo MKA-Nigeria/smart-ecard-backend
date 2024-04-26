@@ -16,6 +16,8 @@ using Infrastructure.Persistence;
 using MediatR;
 using Infrastructure.Common;
 using Infrastructure.Auth;
+using Infrastructure.BackgroundJobs;
+using Infrastructure.Mailing;
 
 [assembly: InternalsVisibleTo("Infrastructure.Test")]
 
@@ -29,13 +31,13 @@ public static class Startup
         return services
             .AddApiVersioning()
             .AddAuth(config)
-            //.AddBackgroundJobs(config)
+            .AddBackgroundJobs(config)
             .AddCaching(config)
             .AddCorsPolicy(config)
             .AddExceptionMiddleware()
             //.AddBehaviours(applicationAssembly)
             //.AddHealthCheck()
-            //.AddMailing(config)
+            .AddMailing(config)
             .AddMediatR(Assembly.GetExecutingAssembly())
              //.AddNotifications(config)
             .AddOpenApiDocumentation(config)
@@ -75,7 +77,7 @@ public static class Startup
             .UseCurrentUser()
             .UseAuthorization()
             .UseRequestLogging(config)
-            //.UseHangfireDashboard(config)
+            .UseHangfireDashboard(config)
             .UseOpenApiDocumentation(config);
 
     public static IEndpointRouteBuilder MapEndpoints(this IEndpointRouteBuilder builder)

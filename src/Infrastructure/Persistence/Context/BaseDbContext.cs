@@ -8,6 +8,7 @@ using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Application.Common.Events;
 using Domain.Common.Contracts;
+using Infrastructure.Auditing;
 
 namespace Infrastructure.Persistence.Context;
 public abstract class BaseDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>, IdentityUserRole<string>, IdentityUserLogin<string>, ApplicationRoleClaim, IdentityUserToken<string>>
@@ -29,7 +30,7 @@ public abstract class BaseDbContext : IdentityDbContext<ApplicationUser, Applica
     // Used by Dapper
     public IDbConnection Connection => Database.GetDbConnection();
 
-    //public DbSet<Trail> AuditTrails => Set<Trail>();
+    public DbSet<Trail> AuditTrails => Set<Trail>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

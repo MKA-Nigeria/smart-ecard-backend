@@ -21,7 +21,7 @@ internal partial class UserService : IUserService
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly ApplicationDbContext _db;
-    private readonly IJobService _jobService;
+    //private readonly IJobService _jobService;
     private readonly IMailService _mailService;
     private readonly SecuritySettings _securitySettings;
     private readonly IEmailTemplateService _templateService;
@@ -34,7 +34,7 @@ internal partial class UserService : IUserService
         UserManager<ApplicationUser> userManager,
         RoleManager<ApplicationRole> roleManager,
         ApplicationDbContext db,
-        IJobService jobService,
+        //IJobService jobService,
         IMailService mailService,
         IEmailTemplateService templateService,
         IEventPublisher events,
@@ -46,7 +46,7 @@ internal partial class UserService : IUserService
         _userManager = userManager;
         _roleManager = roleManager;
         _db = db;
-        _jobService = jobService;
+       // _jobService = jobService;
         _mailService = mailService;
         _templateService = templateService;
         _events = events;

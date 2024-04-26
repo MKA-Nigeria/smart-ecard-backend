@@ -1,7 +1,7 @@
 using System.Collections.ObjectModel;
 
-namespace Template.Shared.Authorization;
-public static class Action
+namespace Shared.Authorization;
+public static class AppAction
 {
     public const string View = nameof(View);
     public const string Search = nameof(Search);
@@ -26,20 +26,20 @@ public static class Permissions
 {
     private static readonly Permission[] _all =
     [
-        new("View Users", Action.View, Resource.Users),
-        new("Search Users", Action.Search, Resource.Users),
-        new("Create Users", Action.Create, Resource.Users),
-        new("Update Users", Action.Update, Resource.Users),
-        new("Delete Users", Action.Delete, Resource.Users),
-        new("Export Users", Action.Export, Resource.Users),
-        new("View UserRoles", Action.View, Resource.UserRoles),
-        new("Update UserRoles", Action.Update, Resource.UserRoles),
-        new("View Roles", Action.View, Resource.Roles),
-        new("Create Roles", Action.Create, Resource.Roles),
-        new("Update Roles", Action.Update, Resource.Roles),
-        new("Delete Roles", Action.Delete, Resource.Roles),
-        new("View RoleClaims", Action.View, Resource.RoleClaims),
-        new("Update RoleClaims", Action.Update, Resource.RoleClaims),
+        new("View Users", AppAction.View, Resource.Users),
+        new("Search Users", AppAction.Search, Resource.Users),
+        new("Create Users", AppAction.Create, Resource.Users),
+        new("Update Users", AppAction.Update, Resource.Users),
+        new("Delete Users", AppAction.Delete, Resource.Users),
+        new("Export Users", AppAction.Export, Resource.Users),
+        new("View UserRoles", AppAction.View, Resource.UserRoles),
+        new("Update UserRoles", AppAction.Update, Resource.UserRoles),
+        new("View Roles", AppAction.View, Resource.Roles),
+        new("Create Roles", AppAction.Create, Resource.Roles),
+        new("Update Roles", AppAction.Update, Resource.Roles),
+        new("Delete Roles", AppAction.Delete, Resource.Roles),
+        new("View RoleClaims", AppAction.View, Resource.RoleClaims),
+        new("Update RoleClaims", AppAction.Update, Resource.RoleClaims),
     ];
 
     public static IReadOnlyList<Permission> All { get; } = new ReadOnlyCollection<Permission>(_all);
@@ -48,8 +48,8 @@ public static class Permissions
     public static IReadOnlyList<Permission> Basic { get; } = new ReadOnlyCollection<Permission>(_all.Where(p => p.IsBasic).ToArray());
 }
 
-public record Permission(string Description, string Action, string Resource, bool IsBasic = false, bool IsRoot = false)
+public record Permission(string Description, string AppAction, string Resource, bool IsBasic = false, bool IsRoot = false)
 {
-    public string Name => NameFor(Action, Resource);
-    public static string NameFor(string action, string resource) => $"Permissions.{resource}.{action}";
+    public string Name => NameFor(AppAction, Resource);
+    public static string NameFor(string AppAction, string resource) => $"Permissions.{resource}.{AppAction}";
 }

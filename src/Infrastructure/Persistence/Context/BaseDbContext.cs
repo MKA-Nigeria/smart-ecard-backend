@@ -6,6 +6,8 @@ using System.Data;
 using Application.Common.Interfaces;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Application.Common.Events;
+using Domain.Common.Contracts;
 
 namespace Infrastructure.Persistence.Context;
 public abstract class BaseDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>, IdentityUserRole<string>, IdentityUserLogin<string>, ApplicationRoleClaim, IdentityUserToken<string>>
@@ -16,7 +18,7 @@ public abstract class BaseDbContext : IdentityDbContext<ApplicationUser, Applica
     private readonly IEventPublisher _events;
 
     protected BaseDbContext(DbContextOptions options, ICurrentUser currentUser, ISerializerService serializer, IOptions<DatabaseSettings> dbSettings, IEventPublisher events)
-        : base(currentTenant, options)
+        : base(options)
     {
         _currentUser = currentUser;
         _serializer = serializer;
@@ -27,7 +29,7 @@ public abstract class BaseDbContext : IdentityDbContext<ApplicationUser, Applica
     // Used by Dapper
     public IDbConnection Connection => Database.GetDbConnection();
 
-    public DbSet<Trail> AuditTrails => Set<Trail>();
+    //public DbSet<Trail> AuditTrails => Set<Trail>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -52,10 +54,6 @@ public abstract class BaseDbContext : IdentityDbContext<ApplicationUser, Applica
         // Or uncomment the next line if you want to see them in the console
         // optionsBuilder.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
 
-        if (!string.IsNullOrWhiteSpace(TenantInfo?.ConnectionString))
-        {
-            optionsBuilder.UseDatabase(_dbSettings.DBProvider, TenantInfo.ConnectionString);
-        }
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())

@@ -15,6 +15,7 @@ using Infrastructure.Auth;
 using Infrastructure.Persistence;
 using MediatR;
 using Infrastructure.Common;
+using Infrastructure.Auth;
 
 [assembly: InternalsVisibleTo("Infrastructure.Test")]
 

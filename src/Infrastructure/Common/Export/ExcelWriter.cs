@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.Data;
 using Application.Common.Exporters;
 
-namespace Template.Infrastructure.Common.Export;
+namespace Infrastructure.Common.Export;
 public class ExcelWriter : IExcelWriter
 {
     public Stream WriteToStream<T>(IList<T> data)

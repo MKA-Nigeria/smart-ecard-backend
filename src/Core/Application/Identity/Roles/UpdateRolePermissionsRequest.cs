@@ -1,3 +1,6 @@
+using Application.Common.Validation;
+using FluentValidation;
+
 namespace Application.Identity.Roles;
 
 public class UpdateRolePermissionsRequest

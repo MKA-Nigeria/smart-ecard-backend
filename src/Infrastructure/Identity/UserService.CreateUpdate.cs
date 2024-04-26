@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Identity.Web;
 using System.Security.Claims;
 using Application.Common.Exceptions;
-using Application.Common.Mailing;
 using Application.Identity.Users;
 using Domain.Common;
 using Domain.Identity;
+using Microsoft.Identity.Web;
 using Shared.Authorization;
+using Application.Common.Mailing;
 
 namespace Infrastructure.Identity;
 internal partial class UserService
@@ -24,10 +24,10 @@ internal partial class UserService
         string? objectId = principal.GetObjectId();
         if (string.IsNullOrWhiteSpace(objectId))
         {
-            throw new InternalServerException(_t["Invalid objectId"]);
+            throw new InternalServerException("Invalid objectId");
         }
 
-        var user = await _userManager.Users.Where(u => u.ObjectId == objectId).FirstOrDefaultAsync()
+        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.ObjectId == objectId)
             ?? await CreateOrUpdateFromPrincipalAsync(principal);
 
         if (principal.FindFirstValue(ClaimTypes.Role) is string role &&
@@ -46,13 +46,13 @@ internal partial class UserService
         string? username = principal.GetDisplayName();
         if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(username))
         {
-            throw new InternalServerException(string.Format(_t["Username or Email not valid."]));
+            throw new InternalServerException(string.Format("Username or Email not valid."));
         }
 
         var user = await _userManager.FindByNameAsync(username);
         if (user is not null && !string.IsNullOrWhiteSpace(user.ObjectId))
         {
-            throw new InternalServerException(string.Format(_t["Username {0} is already taken."], username));
+            throw new InternalServerException(string.Format("Username {0} is already taken.", username));
         }
 
         if (user is null)
@@ -60,7 +60,7 @@ internal partial class UserService
             user = await _userManager.FindByEmailAsync(email);
             if (user is not null && !string.IsNullOrWhiteSpace(user.ObjectId))
             {
-                throw new InternalServerException(string.Format(_t["Email {0} is already taken."], email));
+                throw new InternalServerException(string.Format("Email {0} is already taken.", email));
             }
         }
 
@@ -94,7 +94,7 @@ internal partial class UserService
 
         if (!result.Succeeded)
         {
-            throw new InternalServerException(_t["Validation Errors Occurred."], result.GetErrors(_t));
+            throw new InternalServerException("Validation Errors Occurred.");
         }
 
         return user;
@@ -115,12 +115,12 @@ internal partial class UserService
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
-            throw new InternalServerException(_t["Validation Errors Occurred."], result.GetErrors(_t));
+            throw new InternalServerException("Validation Errors Occurred.");
         }
 
-        await _userManager.AddToRoleAsync(user, FSHRoles.Basic);
+        await _userManager.AddToRoleAsync(user, Roles.Basic);
 
-        var messages = new List<string> { string.Format(_t["User {0} Registered."], user.UserName) };
+        var messages = new List<string> { string.Format("User {0} Registered.", user.UserName) };
 
         if (_securitySettings.RequireConfirmedAccount && !string.IsNullOrEmpty(user.Email))
         {
@@ -134,10 +134,10 @@ internal partial class UserService
             };
             var mailRequest = new MailRequest(
                 new List<string> { user.Email },
-                _t["Confirm Registration"],
+                "Confirm Registration",
                 _templateService.GenerateEmailTemplate("email-confirmation", eMailModel));
             _jobService.Enqueue(() => _mailService.SendAsync(mailRequest, CancellationToken.None));
-            messages.Add(_t[$"Please check {user.Email} to verify your account!"]);
+            messages.Add($"Please check {user.Email} to verify your account!");
         }
 
         await _events.PublishAsync(new ApplicationUserCreatedEvent(user.Id));
@@ -149,18 +149,7 @@ internal partial class UserService
     {
         var user = await _userManager.FindByIdAsync(userId);
 
-        _ = user ?? throw new NotFoundException(_t["User Not Found."]);
-
-        string currentImage = user.ImageUrl ?? string.Empty;
-        if (request.Image != null || request.DeleteCurrentImage)
-        {
-            user.ImageUrl = await _fileStorage.UploadAsync<ApplicationUser>(request.Image, FileType.Image);
-            if (request.DeleteCurrentImage && !string.IsNullOrEmpty(currentImage))
-            {
-                string root = Directory.GetCurrentDirectory();
-                _fileStorage.Remove(Path.Combine(root, currentImage));
-            }
-        }
+        _ = user ?? throw new NotFoundException("User Not Found.");
 
         user.FirstName = request.FirstName;
         user.LastName = request.LastName;
@@ -179,7 +168,7 @@ internal partial class UserService
 
         if (!result.Succeeded)
         {
-            throw new InternalServerException(_t["Update profile failed"], result.GetErrors(_t));
+            throw new InternalServerException("Update profile failed");
         }
     }
 }

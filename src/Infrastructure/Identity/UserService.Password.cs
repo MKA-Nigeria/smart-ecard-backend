@@ -8,13 +8,12 @@ internal partial class UserService
 {
     public async Task<string> ForgotPasswordAsync(ForgotPasswordRequest request, string origin)
     {
-        EnsureValidTenant();
 
         var user = await _userManager.FindByEmailAsync(request.Email.Normalize());
         if (user is null || !await _userManager.IsEmailConfirmedAsync(user))
         {
             // Don't reveal that the user does not exist or is not confirmed
-            throw new InternalServerException(_t["An Error has occurred!"]);
+            throw new InternalServerException("An Error has occurred!");
         }
 
         // For more information on how to enable account confirmation and password reset please
@@ -25,11 +24,11 @@ internal partial class UserService
         string passwordResetUrl = QueryHelpers.AddQueryString(endpointUri.ToString(), "Token", code);
         var mailRequest = new MailRequest(
             new List<string> { request.Email },
-            _t["Reset Password"],
-            _t[$"Your Password Reset Token is '{code}'. You can reset your password using the {endpointUri} Endpoint."]);
+            "Reset Password",
+            $"Your Password Reset Token is '{code}'. You can reset your password using the {endpointUri}.");
         _jobService.Enqueue(() => _mailService.SendAsync(mailRequest, CancellationToken.None));
 
-        return _t["Password Reset Mail has been sent to your authorized Email."];
+        return "Password Reset Mail has been sent to your authorized Email.";
     }
 
     public async Task<string> ResetPasswordAsync(ResetPasswordRequest request)
@@ -37,26 +36,26 @@ internal partial class UserService
         var user = await _userManager.FindByEmailAsync(request.Email?.Normalize()!);
 
         // Don't reveal that the user does not exist
-        _ = user ?? throw new InternalServerException(_t["An Error has occurred!"]);
+        _ = user ?? throw new InternalServerException("An Error has occurred!");
 
         var result = await _userManager.ResetPasswordAsync(user, request.Token!, request.Password!);
 
         return result.Succeeded
-            ? _t["Password Reset Successful!"]
-            : throw new InternalServerException(_t["An Error has occurred!"]);
+            ? "Password Reset Successful!"
+            : throw new InternalServerException("An Error has occurred!");
     }
 
     public async Task ChangePasswordAsync(ChangePasswordRequest model, string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
 
-        _ = user ?? throw new NotFoundException(_t["User Not Found."]);
+        _ = user ?? throw new NotFoundException("User Not Found.");
 
         var result = await _userManager.ChangePasswordAsync(user, model.Password, model.NewPassword);
 
         if (!result.Succeeded)
         {
-            throw new InternalServerException(_t["Change password failed"], result.GetErrors(_t));
+            throw new InternalServerException("Change password failed");
         }
     }
 }

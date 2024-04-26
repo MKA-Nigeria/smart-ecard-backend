@@ -1,3 +1,6 @@
+using Application.Common.Validation;
+using FluentValidation;
+
 namespace Application.Identity.Users.Password;
 
 public class ChangePasswordRequest
@@ -9,7 +12,7 @@ public class ChangePasswordRequest
 
 public class ChangePasswordRequestValidator : CustomValidator<ChangePasswordRequest>
 {
-    public ChangePasswordRequestValidator(IStringLocalizer<ChangePasswordRequestValidator> T)
+    public ChangePasswordRequestValidator()
     {
         RuleFor(p => p.Password)
             .NotEmpty();
@@ -19,6 +22,6 @@ public class ChangePasswordRequestValidator : CustomValidator<ChangePasswordRequ
 
         RuleFor(p => p.ConfirmNewPassword)
             .Equal(p => p.NewPassword)
-                .WithMessage(T["Passwords do not match."]);
+                .WithMessage("Passwords do not match.");
     }
 }

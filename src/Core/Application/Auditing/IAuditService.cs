@@ -1,4 +1,4 @@
-namespace Template.Application.Auditing;
+namespace Application.Auditing;
 
 public interface IAuditService : ITransientService
 {

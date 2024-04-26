@@ -1,7 +1,8 @@
-using Host.Controllers;
 using Application.Identity.Roles;
+using Infrastructure.Auth.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
+using Shared.Authorization;
 
 namespace Host.Controllers.Identity;
 public class RolesController : VersionNeutralApiController
@@ -11,7 +12,7 @@ public class RolesController : VersionNeutralApiController
     public RolesController(IRoleService roleService) => _roleService = roleService;
 
     [HttpGet]
-    [MustHavePermission(FSHAction.View, FSHResource.Roles)]
+    [MustHavePermission(AppAction.View, AppResource.Roles)]
     [OpenApiOperation("Get a list of all roles.", "")]
     public Task<List<RoleDto>> GetListAsync(CancellationToken cancellationToken)
     {
@@ -19,7 +20,7 @@ public class RolesController : VersionNeutralApiController
     }
 
     [HttpGet("{id}")]
-    [MustHavePermission(FSHAction.View, FSHResource.Roles)]
+    [MustHavePermission(AppAction.View, AppResource.Roles)]
     [OpenApiOperation("Get role details.", "")]
     public Task<RoleDto> GetByIdAsync(string id)
     {
@@ -27,7 +28,7 @@ public class RolesController : VersionNeutralApiController
     }
 
     [HttpGet("{id}/permissions")]
-    [MustHavePermission(FSHAction.View, FSHResource.RoleClaims)]
+    [MustHavePermission(AppAction.View, AppResource.RoleClaims)]
     [OpenApiOperation("Get role details with its permissions.", "")]
     public Task<RoleDto> GetByIdWithPermissionsAsync(string id, CancellationToken cancellationToken)
     {
@@ -35,7 +36,7 @@ public class RolesController : VersionNeutralApiController
     }
 
     [HttpPut("{id}/permissions")]
-    [MustHavePermission(FSHAction.Update, FSHResource.RoleClaims)]
+    [MustHavePermission(AppAction.Update, AppResource.RoleClaims)]
     [OpenApiOperation("Update a role's permissions.", "")]
     public async Task<ActionResult<string>> UpdatePermissionsAsync(string id, UpdateRolePermissionsRequest request, CancellationToken cancellationToken)
     {
@@ -48,7 +49,7 @@ public class RolesController : VersionNeutralApiController
     }
 
     [HttpPost]
-    [MustHavePermission(FSHAction.Create, FSHResource.Roles)]
+    [MustHavePermission(AppAction.Create, AppResource.Roles)]
     [OpenApiOperation("Create or update a role.", "")]
     public Task<string> RegisterRoleAsync(CreateOrUpdateRoleRequest request)
     {
@@ -56,7 +57,7 @@ public class RolesController : VersionNeutralApiController
     }
 
     [HttpDelete("{id}")]
-    [MustHavePermission(FSHAction.Delete, FSHResource.Roles)]
+    [MustHavePermission(AppAction.Delete, AppResource.Roles)]
     [OpenApiOperation("Delete a role.", "")]
     public Task<string> DeleteAsync(string id)
     {

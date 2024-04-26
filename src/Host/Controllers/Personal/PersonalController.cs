@@ -1,9 +1,9 @@
+using Application.Auditing;
+using Application.Identity.Users;
+using Application.Identity.Users.Password;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
 using System.Security.Claims;
-using Template.Application.Auditing;
-using Template.Application.Identity.Users;
-using Template.Application.Identity.Users.Password;
 
 namespace Host.Controllers.Identity;
 public class PersonalController : VersionNeutralApiController
@@ -36,7 +36,7 @@ public class PersonalController : VersionNeutralApiController
 
     [HttpPut("change-password")]
     [OpenApiOperation("Change password of currently logged in user.", "")]
-    [ApiConventionMethod(typeof(FSHApiConventions), nameof(FSHApiConventions.Register))]
+    [ApiConventionMethod(typeof(ApiConventions), nameof(ApiConventions.Register))]
     public async Task<ActionResult> ChangePasswordAsync(ChangePasswordRequest model)
     {
         if (User.GetUserId() is not { } userId || string.IsNullOrEmpty(userId))

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Application.Common.Interfaces;
 using Application.Common.Models;
 using Application.Identity.Users.Password;
+using Application.Identity.Users;
 
 namespace Application.Identity.Users;
 public interface IUserService : ITransientService

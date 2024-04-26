@@ -1,10 +1,10 @@
+using Application.Common.Caching;
+using Application.Common.Interfaces;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
 using System.Text;
-using Template.Application.Common.Caching;
-using Template.Application.Common.Interfaces;
 
-namespace Template.Infrastructure.Caching;
+namespace Infrastructure.Caching;
 #pragma warning disable CA2254
 public class DistributedCacheService : ICacheService
 {

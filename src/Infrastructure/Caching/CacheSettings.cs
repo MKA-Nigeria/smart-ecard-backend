@@ -1,4 +1,4 @@
-namespace Template.Infrastructure.Caching;
+namespace Infrastructure.Caching;
 
 public class CacheSettings
 {

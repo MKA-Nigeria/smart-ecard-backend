@@ -1,8 +1,8 @@
+using Application.Common.Caching;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
-using Template.Application.Common.Caching;
 
-namespace Template.Infrastructure.Caching;
+namespace Infrastructure.Caching;
 public class LocalCacheService : ICacheService
 {
     private readonly ILogger<LocalCacheService> _logger;

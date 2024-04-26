@@ -1,4 +1,5 @@
-﻿using Shared.Events;
+﻿using Domain.Common.Events;
+using MediatR;
 
 namespace Application.Common.Events;
 // This is just a shorthand to make it a bit easier to create event handlers for specific events.

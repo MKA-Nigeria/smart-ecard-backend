@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Application.Identity.Users;
-using Application.Identity.Users.Password;
 using NSwag.Annotations;
 using Microsoft.AspNetCore.Authorization;
+using Application.Identity.Users.Password;
+using Infrastructure.Auth.Permissions;
+using Shared.Authorization;
 
 namespace Host.Controllers.Identity;
 public class UsersController : VersionNeutralApiController
@@ -12,7 +14,7 @@ public class UsersController : VersionNeutralApiController
     public UsersController(IUserService userService) => _userService = userService;
 
     [HttpGet]
-    [MustHavePermission(FSHAction.View, FSHResource.Users)]
+    [MustHavePermission(AppAction.View, AppResource.Users)]
     [OpenApiOperation("Get list of all users.", "")]
     public Task<List<UserDetailsDto>> GetListAsync(CancellationToken cancellationToken)
     {
@@ -20,7 +22,7 @@ public class UsersController : VersionNeutralApiController
     }
 
     [HttpGet("{id}")]
-    [MustHavePermission(FSHAction.View, FSHResource.Users)]
+    [MustHavePermission(AppAction.View, AppResource.Users)]
     [OpenApiOperation("Get a user's details.", "")]
     public Task<UserDetailsDto> GetByIdAsync(string id, CancellationToken cancellationToken)
     {
@@ -28,7 +30,7 @@ public class UsersController : VersionNeutralApiController
     }
 
     [HttpGet("{id}/roles")]
-    [MustHavePermission(FSHAction.View, FSHResource.UserRoles)]
+    [MustHavePermission(AppAction.View, AppResource.UserRoles)]
     [OpenApiOperation("Get a user's roles.", "")]
     public Task<List<UserRoleDto>> GetRolesAsync(string id, CancellationToken cancellationToken)
     {
@@ -37,7 +39,7 @@ public class UsersController : VersionNeutralApiController
 
     [HttpPost("{id}/roles")]
     [ApiConventionMethod(typeof(ApiConventions), nameof(ApiConventions.Register))]
-    [MustHavePermission(FSHAction.Update, FSHResource.UserRoles)]
+    [MustHavePermission(AppAction.Update, AppResource.UserRoles)]
     [OpenApiOperation("Update a user's assigned roles.", "")]
     public Task<string> AssignRolesAsync(string id, UserRolesRequest request, CancellationToken cancellationToken)
     {
@@ -45,7 +47,7 @@ public class UsersController : VersionNeutralApiController
     }
 
     [HttpPost]
-    [MustHavePermission(FSHAction.Create, FSHResource.Users)]
+    [MustHavePermission(AppAction.Create, AppResource.Users)]
     [OpenApiOperation("Creates a new user.", "")]
     public Task<string> CreateAsync(CreateUserRequest request)
     {
@@ -68,7 +70,7 @@ public class UsersController : VersionNeutralApiController
     }
 
     [HttpPost("{id}/toggle-status")]
-    [MustHavePermission(FSHAction.Update, FSHResource.Users)]
+    [MustHavePermission(AppAction.Update, AppResource.Users)]
     [ApiConventionMethod(typeof(ApiConventions), nameof(ApiConventions.Register))]
     [OpenApiOperation("Toggle a user's active status.", "")]
     public async Task<ActionResult> ToggleStatusAsync(string id, ToggleUserStatusRequest request, CancellationToken cancellationToken)
@@ -89,15 +91,6 @@ public class UsersController : VersionNeutralApiController
     public Task<string> ConfirmEmailAsync([FromQuery] string tenant, [FromQuery] string userId, [FromQuery] string code, CancellationToken cancellationToken)
     {
         return _userService.ConfirmEmailAsync(userId, code, tenant, cancellationToken);
-    }
-
-    [HttpGet("confirm-phone-number")]
-    [AllowAnonymous]
-    [OpenApiOperation("Confirm phone number for a user.", "")]
-    [ApiConventionMethod(typeof(ApiConventions), nameof(ApiConventions.Search))]
-    public Task<string> ConfirmPhoneNumberAsync([FromQuery] string userId, [FromQuery] string code)
-    {
-        return _userService.ConfirmPhoneNumberAsync(userId, code);
     }
 
     [HttpPost("forgot-password")]

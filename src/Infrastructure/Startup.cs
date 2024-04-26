@@ -11,7 +11,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using Template.Infrastructure.Auth;
+using Infrastructure.Auth;
+using Infrastructure.Persistence;
+using MediatR;
+using Infrastructure.Common;
 
 [assembly: InternalsVisibleTo("Infrastructure.Test")]
 
@@ -33,9 +36,9 @@ public static class Startup
             //.AddHealthCheck()
             //.AddMailing(config)
             .AddMediatR(Assembly.GetExecutingAssembly())
-            //.AddNotifications(config)
+             //.AddNotifications(config)
             .AddOpenApiDocumentation(config)
-            //.AddPersistence()
+            .AddPersistence()
             .AddRequestLogging(config)
             .AddRouting(options => options.LowercaseUrls = true)
             .AddServices();

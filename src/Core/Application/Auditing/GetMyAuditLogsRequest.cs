@@ -1,3 +1,6 @@
+using Application.Common.Interfaces;
+using MediatR;
+
 namespace Application.Auditing;
 
 public class GetMyAuditLogsRequest : IRequest<List<AuditDto>>

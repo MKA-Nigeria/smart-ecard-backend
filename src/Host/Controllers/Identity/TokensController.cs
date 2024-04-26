@@ -15,7 +15,7 @@ public sealed class TokensController : VersionNeutralApiController
     [OpenApiOperation("Request an access token using credentials.", "")]
     public Task<TokenResponse> GetTokenAsync(TokenRequest request, CancellationToken cancellationToken)
     {
-        return _tokenService.GetTokenAsync(request, GetIpAddress()!, cancellationToken);
+        return _tokenService.GetTokenAsync(request, cancellationToken);
     }
 
     [HttpPost("refresh")]

@@ -1,8 +1,5 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,66 +7,44 @@ using Application.Common.Exceptions;
 using Application.Identity.Tokens;
 using Infrastructure.Auth;
 using Infrastructure.Auth.Jwt;
-using Infrastructure.Multitenancy;
-using Shared.Authorization;
-using Shared.Multitenancy;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Infrastructure.Identity;
 internal class TokenService : ITokenService
 {
     private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IStringLocalizer _t;
     private readonly SecuritySettings _securitySettings;
     private readonly JwtSettings _jwtSettings;
-    private readonly FSHTenantInfo? _currentTenant;
 
     public TokenService(
         UserManager<ApplicationUser> userManager,
         IOptions<JwtSettings> jwtSettings,
-        IStringLocalizer<TokenService> localizer,
-        FSHTenantInfo? currentTenant,
         IOptions<SecuritySettings> securitySettings)
     {
         _userManager = userManager;
-        _t = localizer;
         _jwtSettings = jwtSettings.Value;
-        _currentTenant = currentTenant;
         _securitySettings = securitySettings.Value;
     }
 
-    public async Task<TokenResponse> GetTokenAsync(TokenRequest request, string ipAddress, CancellationToken cancellationToken)
+    public async Task<TokenResponse> GetTokenAsync(TokenRequest request, CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(_currentTenant?.Id)
-            || await _userManager.FindByEmailAsync(request.Email.Trim().Normalize()) is not { } user
-            || !await _userManager.CheckPasswordAsync(user, request.Password))
+
+        if (await _userManager.FindByEmailAsync(request.Email.Trim().Normalize()) is not { } user)
         {
-            throw new UnauthorizedException(_t["Authentication Failed."]);
+            throw new UnauthorizedException("Authentication Failed.");
         }
 
         if (!user.IsActive)
         {
-            throw new UnauthorizedException(_t["User Not Active. Please contact the administrator."]);
+            throw new UnauthorizedException("User Not Active. Please contact the administrator.");
         }
 
         if (_securitySettings.RequireConfirmedAccount && !user.EmailConfirmed)
         {
-            throw new UnauthorizedException(_t["E-Mail not confirmed."]);
+            throw new UnauthorizedException("E-Mail not confirmed.");
         }
-
-        if (_currentTenant.Id != MultitenancyConstants.Root.Id)
-        {
-            if (!_currentTenant.IsActive)
-            {
-                throw new UnauthorizedException(_t["Tenant is not Active. Please contact the Application Administrator."]);
-            }
-
-            if (DateTime.UtcNow > _currentTenant.ValidUpto)
-            {
-                throw new UnauthorizedException(_t["Tenant Validity Has Expired. Please contact the Application Administrator."]);
-            }
-        }
-
-        return await GenerateTokensAndUpdateUser(user, ipAddress);
+        return await GenerateTokensAndUpdateUser(user);
     }
 
     public async Task<TokenResponse> RefreshTokenAsync(RefreshTokenRequest request, string ipAddress)
@@ -79,20 +54,20 @@ internal class TokenService : ITokenService
         var user = await _userManager.FindByEmailAsync(userEmail!);
         if (user is null)
         {
-            throw new UnauthorizedException(_t["Authentication Failed."]);
+            throw new UnauthorizedException("Authentication Failed.");
         }
 
         if (user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
         {
-            throw new UnauthorizedException(_t["Invalid Refresh Token."]);
+            throw new UnauthorizedException("Invalid Refresh Token.");
         }
 
-        return await GenerateTokensAndUpdateUser(user, ipAddress);
+        return await GenerateTokensAndUpdateUser(user);
     }
 
-    private async Task<TokenResponse> GenerateTokensAndUpdateUser(ApplicationUser user, string ipAddress)
+    private async Task<TokenResponse> GenerateTokensAndUpdateUser(ApplicationUser user)
     {
-        string token = GenerateJwt(user, ipAddress);
+        string token = GenerateJwt(user);
 
         user.RefreshToken = GenerateRefreshToken();
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationInDays);
@@ -102,21 +77,15 @@ internal class TokenService : ITokenService
         return new TokenResponse(token, user.RefreshToken, user.RefreshTokenExpiryTime);
     }
 
-    private string GenerateJwt(ApplicationUser user, string ipAddress) =>
-        GenerateEncryptedToken(GetSigningCredentials(), GetClaims(user, ipAddress));
+    private string GenerateJwt(ApplicationUser user) =>
+        GenerateEncryptedToken(GetSigningCredentials(), GetClaims(user));
 
-    private IEnumerable<Claim> GetClaims(ApplicationUser user, string ipAddress) =>
+    private IEnumerable<Claim> GetClaims(ApplicationUser user) =>
         new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id),
             new(ClaimTypes.Email, user.Email!),
-            new(FSHClaims.Fullname, $"{user.FirstName} {user.LastName}"),
-            new(ClaimTypes.Name, user.FirstName ?? string.Empty),
-            new(ClaimTypes.Surname, user.LastName ?? string.Empty),
-            new(FSHClaims.IpAddress, ipAddress),
-            new(FSHClaims.Tenant, _currentTenant!.Id),
-            new(FSHClaims.ImageUrl, user.ImageUrl ?? string.Empty),
-            new(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty)
+            new(ClaimTypes.Name, user.UserName)
         };
 
     private static string GenerateRefreshToken()
@@ -151,12 +120,13 @@ internal class TokenService : ITokenService
         };
         var tokenHandler = new JwtSecurityTokenHandler();
         var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var securityToken);
+
         if (securityToken is not JwtSecurityToken jwtSecurityToken ||
             !jwtSecurityToken.Header.Alg.Equals(
                 SecurityAlgorithms.HmacSha256,
                 StringComparison.InvariantCultureIgnoreCase))
         {
-            throw new UnauthorizedException(_t["Invalid Token."]);
+            throw new UnauthorizedException("Invalid Token.");
         }
 
         return principal;

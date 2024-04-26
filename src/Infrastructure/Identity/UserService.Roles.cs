@@ -3,7 +3,6 @@ using Application.Common.Exceptions;
 using Application.Identity.Users;
 using Domain.Identity;
 using Shared.Authorization;
-using Shared.Multitenancy;
 
 namespace Infrastructure.Identity;
 internal partial class UserService
@@ -36,29 +35,7 @@ internal partial class UserService
 
         var user = await _userManager.Users.Where(u => u.Id == userId).FirstOrDefaultAsync(cancellationToken);
 
-        _ = user ?? throw new NotFoundException(_t["User Not Found."]);
-
-        // Check if the user is an admin for which the admin role is getting disabled
-        if (await _userManager.IsInRoleAsync(user, FSHRoles.Admin)
-            && request.UserRoles.Any(a => !a.Enabled && a.RoleName == FSHRoles.Admin))
-        {
-            // Get count of users in Admin Role
-            int adminCount = (await _userManager.GetUsersInRoleAsync(FSHRoles.Admin)).Count;
-
-            // Check if user is not Root Tenant Admin
-            // Edge Case : there are chances for other tenants to have users with the same email as that of Root Tenant Admin. Probably can add a check while User Registration
-            if (user.Email == MultitenancyConstants.Root.EmailAddress)
-            {
-                if (_currentTenant.Id == MultitenancyConstants.Root.Id)
-                {
-                    throw new ConflictException(_t["Cannot Remove Admin Role From Root Tenant Admin."]);
-                }
-            }
-            else if (adminCount <= 2)
-            {
-                throw new ConflictException(_t["Tenant should have at least 2 Admins."]);
-            }
-        }
+        _ = user ?? throw new NotFoundException("User Not Found.");
 
         foreach (var userRole in request.UserRoles)
         {
@@ -81,6 +58,6 @@ internal partial class UserService
 
         await _events.PublishAsync(new ApplicationUserUpdatedEvent(user.Id, true));
 
-        return _t["User Roles Updated Successfully."];
+        return "User Roles Updated Successfully.";
     }
 }

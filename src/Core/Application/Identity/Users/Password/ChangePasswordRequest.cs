@@ -1,4 +1,4 @@
-namespace Template.Application.Identity.Users.Password;
+namespace Application.Identity.Users.Password;
 
 public class ChangePasswordRequest
 {

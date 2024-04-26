@@ -1,4 +1,4 @@
-namespace Template.Application.Identity.Roles;
+namespace Application.Identity.Roles;
 
 public class CreateOrUpdateRoleRequest
 {

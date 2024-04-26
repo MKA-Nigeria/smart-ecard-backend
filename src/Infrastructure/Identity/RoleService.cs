@@ -1,18 +1,10 @@
-using Finbuckle.MultiTenant;
-using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
-using Template.Application.Common.Events;
-using Template.Application.Common.Exceptions;
-using Template.Application.Common.Interfaces;
-using Template.Application.Identity.Roles;
-using Template.Domain.Identity;
-using Template.Infrastructure.Persistence.Context;
-using Template.Shared.Authorization;
-using Template.Shared.Multitenancy;
-
-namespace Template.Infrastructure.Identity;
+using Application.Common.Events;
+using Application.Common.Exceptions;
+using Application.Common.Interfaces;
+using Application.Identity.Roles;
+namespace Infrastructure.Identity;
 internal class RoleService : IRoleService
 {
     private readonly RoleManager<ApplicationRole> _roleManager;

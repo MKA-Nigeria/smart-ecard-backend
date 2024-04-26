@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
-using Template.Shared.Authorization;
+using Shared.Authorization;
 
-namespace Template.Infrastructure.Auth.Permissions;
+namespace Infrastructure.Auth.Permissions;
 internal class PermissionPolicyProvider : IAuthorizationPolicyProvider
 {
     public DefaultAuthorizationPolicyProvider FallbackPolicyProvider { get; }

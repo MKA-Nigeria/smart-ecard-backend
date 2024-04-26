@@ -2,13 +2,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Template.Application.Common.Interfaces;
-using Template.Infrastructure.Auth.AzureAd;
-using Template.Infrastructure.Auth.Jwt;
-using Template.Infrastructure.Auth.Permissions;
-using Template.Infrastructure.Identity;
+using Application.Common.Interfaces;
+using Infrastructure.Auth.AzureAd;
+using Infrastructure.Auth.Jwt;
+using Infrastructure.Auth.Permissions;
+using Infrastructure.Identity;
 
-namespace Template.Infrastructure.Auth;
+namespace Infrastructure.Auth;
 internal static class Startup
 {
     internal static IServiceCollection AddAuth(this IServiceCollection services, IConfiguration config)

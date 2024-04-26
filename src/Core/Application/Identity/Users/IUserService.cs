@@ -1,7 +1,9 @@
 using System.Security.Claims;
-using Template.Application.Identity.Users.Password;
+using Application.Common.Interfaces;
+using Application.Common.Models;
+using Application.Identity.Users.Password;
 
-namespace Template.Application.Identity.Users;
+namespace Application.Identity.Users;
 public interface IUserService : ITransientService
 {
     Task<PaginationResponse<UserDetailsDto>> SearchAsync(UserListFilter filter, CancellationToken cancellationToken);

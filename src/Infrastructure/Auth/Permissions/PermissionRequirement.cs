@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 
-namespace Template.Infrastructure.Auth.Permissions;
+namespace Infrastructure.Auth.Permissions;
 internal class PermissionRequirement : IAuthorizationRequirement
 {
     public string Permission { get; private set; }

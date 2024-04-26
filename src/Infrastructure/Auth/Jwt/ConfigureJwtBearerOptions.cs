@@ -3,9 +3,9 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Text;
-using Template.Application.Common.Exceptions;
+using Application.Common.Exceptions;
 
-namespace Template.Infrastructure.Auth.Jwt;
+namespace Infrastructure.Auth.Jwt;
 public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions>
 {
     private readonly JwtSettings _jwtSettings;

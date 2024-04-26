@@ -1,4 +1,4 @@
-namespace Template.Infrastructure.Auth;
+namespace Infrastructure.Auth;
 
 public class SecuritySettings
 {

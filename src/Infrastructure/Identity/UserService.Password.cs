@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
-using Template.Application.Common.Exceptions;
-using Template.Application.Common.Mailing;
-using Template.Application.Identity.Users.Password;
+using Application.Common.Exceptions;
+using Application.Common.Mailing;
+using Application.Identity.Users.Password;
 
-namespace Template.Infrastructure.Identity;
+namespace Infrastructure.Identity;
 internal partial class UserService
 {
     public async Task<string> ForgotPasswordAsync(ForgotPasswordRequest request, string origin)

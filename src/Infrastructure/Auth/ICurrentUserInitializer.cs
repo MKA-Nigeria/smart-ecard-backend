@@ -1,6 +1,6 @@
 ﻿using System.Security.Claims;
 
-namespace Template.Infrastructure.Auth;
+namespace Infrastructure.Auth;
 public interface ICurrentUserInitializer
 {
     void SetCurrentUser(ClaimsPrincipal user);

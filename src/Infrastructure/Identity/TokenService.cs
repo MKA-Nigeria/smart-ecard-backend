@@ -6,15 +6,15 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Template.Application.Common.Exceptions;
-using Template.Application.Identity.Tokens;
-using Template.Infrastructure.Auth;
-using Template.Infrastructure.Auth.Jwt;
-using Template.Infrastructure.Multitenancy;
-using Template.Shared.Authorization;
-using Template.Shared.Multitenancy;
+using Application.Common.Exceptions;
+using Application.Identity.Tokens;
+using Infrastructure.Auth;
+using Infrastructure.Auth.Jwt;
+using Infrastructure.Multitenancy;
+using Shared.Authorization;
+using Shared.Multitenancy;
 
-namespace Template.Infrastructure.Identity;
+namespace Infrastructure.Identity;
 internal class TokenService : ITokenService
 {
     private readonly UserManager<ApplicationUser> _userManager;

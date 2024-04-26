@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Template.Infrastructure.Auth.Jwt;
+namespace Infrastructure.Auth.Jwt;
 internal static class Startup
 {
     internal static IServiceCollection AddJwtAuth(this IServiceCollection services)

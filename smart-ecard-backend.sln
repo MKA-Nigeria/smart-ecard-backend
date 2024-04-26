@@ -3,13 +3,15 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34607.79
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "src\Core\Domain\Domain.csproj", "{576C6B22-C158-424F-BC24-72451ADFEC75}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Domain", "src\Core\Domain\Domain.csproj", "{576C6B22-C158-424F-BC24-72451ADFEC75}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "src\Core\Application\Application.csproj", "{FAB0FC13-F0A6-4B5B-8612-986F65CCFABF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Application", "src\Core\Application\Application.csproj", "{FAB0FC13-F0A6-4B5B-8612-986F65CCFABF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Infrastructure", "src\Infrastructure\Infrastructure.csproj", "{641524DB-E563-4C0F-8D43-D672934D275A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "src\Infrastructure\Infrastructure.csproj", "{641524DB-E563-4C0F-8D43-D672934D275A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Host", "src\Host\Host.csproj", "{3741E38E-D1AB-40EB-9395-BD5C44EBBC5B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Host", "src\Host\Host.csproj", "{3741E38E-D1AB-40EB-9395-BD5C44EBBC5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{9CD85673-DAA1-4ED0-BFE1-13EC7229ECB1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{3741E38E-D1AB-40EB-9395-BD5C44EBBC5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3741E38E-D1AB-40EB-9395-BD5C44EBBC5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3741E38E-D1AB-40EB-9395-BD5C44EBBC5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CD85673-DAA1-4ED0-BFE1-13EC7229ECB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CD85673-DAA1-4ED0-BFE1-13EC7229ECB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CD85673-DAA1-4ED0-BFE1-13EC7229ECB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CD85673-DAA1-4ED0-BFE1-13EC7229ECB1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

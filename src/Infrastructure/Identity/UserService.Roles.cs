@@ -1,11 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Template.Application.Common.Exceptions;
-using Template.Application.Identity.Users;
-using Template.Domain.Identity;
-using Template.Shared.Authorization;
-using Template.Shared.Multitenancy;
+using Application.Common.Exceptions;
+using Application.Identity.Users;
+using Domain.Identity;
+using Shared.Authorization;
+using Shared.Multitenancy;
 
-namespace Template.Infrastructure.Identity;
+namespace Infrastructure.Identity;
 internal partial class UserService
 {
     public async Task<List<UserRoleDto>> GetRolesAsync(string userId, CancellationToken cancellationToken)

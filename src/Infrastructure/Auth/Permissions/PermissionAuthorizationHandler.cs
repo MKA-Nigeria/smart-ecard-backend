@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
-using Template.Application.Identity.Users;
+using Application.Identity.Users;
 
-namespace Template.Infrastructure.Auth.Permissions;
+namespace Infrastructure.Auth.Permissions;
 internal class PermissionAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
 {
     private readonly IUserService _userService;

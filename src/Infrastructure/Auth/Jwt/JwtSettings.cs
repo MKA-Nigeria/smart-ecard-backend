@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Template.Infrastructure.Auth.Jwt;
+namespace Infrastructure.Auth.Jwt;
 public class JwtSettings : IValidatableObject
 {
     public string Key { get; set; } = string.Empty;

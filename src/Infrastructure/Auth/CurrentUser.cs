@@ -1,7 +1,7 @@
 using System.Security.Claims;
-using Template.Application.Common.Interfaces;
+using Application.Common.Interfaces;
 
-namespace Template.Infrastructure.Auth;
+namespace Infrastructure.Auth;
 public class CurrentUser : ICurrentUser, ICurrentUserInitializer
 {
     private ClaimsPrincipal? _user;

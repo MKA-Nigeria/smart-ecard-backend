@@ -1,4 +1,4 @@
-namespace Template.Application.Identity.Users;
+namespace Application.Identity.Users;
 
 public class UpdateUserRequest
 {
@@ -7,6 +7,5 @@ public class UpdateUserRequest
     public string? LastName { get; set; }
     public string? PhoneNumber { get; set; }
     public string? Email { get; set; }
-    public FileUploadRequest? Image { get; set; }
     public bool DeleteCurrentImage { get; set; } = false;
 }

@@ -1,26 +1,24 @@
-namespace Template.Application.Identity.Users;
+using Application.Common.Validation;
+using FluentValidation;
+
+namespace Application.Identity.Users;
 
 public class CreateUserRequestValidator : CustomValidator<CreateUserRequest>
 {
-    public CreateUserRequestValidator(IUserService userService, IStringLocalizer<CreateUserRequestValidator> T)
+    public CreateUserRequestValidator(IUserService userService)
     {
         RuleFor(u => u.Email).Cascade(CascadeMode.Stop)
             .NotEmpty()
             .EmailAddress()
-                .WithMessage(T["Invalid Email Address."])
+                .WithMessage("Invalid Email Address.")
             .MustAsync(async (email, _) => !await userService.ExistsWithEmailAsync(email))
-                .WithMessage((_, email) => T["Email {0} is already registered.", email]);
+                .WithMessage((_, email) => $"Email {email} is already registered.");
 
         RuleFor(u => u.UserName).Cascade(CascadeMode.Stop)
             .NotEmpty()
             .MinimumLength(6)
             .MustAsync(async (name, _) => !await userService.ExistsWithNameAsync(name))
-                .WithMessage((_, name) => T["Username {0} is already taken.", name]);
-
-        RuleFor(u => u.PhoneNumber).Cascade(CascadeMode.Stop)
-            .MustAsync(async (phone, _) => !await userService.ExistsWithPhoneNumberAsync(phone!))
-                .WithMessage((_, phone) => T["Phone number {0} is already registered.", phone!])
-                .Unless(u => string.IsNullOrWhiteSpace(u.PhoneNumber));
+                .WithMessage((_, name) => $"Username {name} is already taken.");
 
         RuleFor(p => p.FirstName).Cascade(CascadeMode.Stop)
             .NotEmpty();
@@ -34,6 +32,6 @@ public class CreateUserRequestValidator : CustomValidator<CreateUserRequest>
 
         RuleFor(p => p.ConfirmPassword).Cascade(CascadeMode.Stop)
             .NotEmpty()
-            .Equal(p => p.Password);
+            .Equal(p => p.Password).WithMessage("The passwords doesn't match");
     }
 }

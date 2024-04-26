@@ -2,14 +2,14 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web;
 using System.Security.Claims;
-using Template.Application.Common.Exceptions;
-using Template.Application.Common.Mailing;
-using Template.Application.Identity.Users;
-using Template.Domain.Common;
-using Template.Domain.Identity;
-using Template.Shared.Authorization;
+using Application.Common.Exceptions;
+using Application.Common.Mailing;
+using Application.Identity.Users;
+using Domain.Common;
+using Domain.Identity;
+using Shared.Authorization;
 
-namespace Template.Infrastructure.Identity;
+namespace Infrastructure.Identity;
 internal partial class UserService
 {
     /// <summary>

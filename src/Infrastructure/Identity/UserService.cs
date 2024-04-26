@@ -6,21 +6,21 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Options;
-using Template.Application.Common.Caching;
-using Template.Application.Common.Events;
-using Template.Application.Common.Exceptions;
-using Template.Application.Common.FileStorage;
-using Template.Application.Common.Interfaces;
-using Template.Application.Common.Mailing;
-using Template.Application.Common.Models;
-using Template.Application.Common.Specification;
-using Template.Application.Identity.Users;
-using Template.Domain.Identity;
-using Template.Infrastructure.Auth;
-using Template.Infrastructure.Persistence.Context;
-using Template.Shared.Authorization;
+using Application.Common.Caching;
+using Application.Common.Events;
+using Application.Common.Exceptions;
+using Application.Common.FileStorage;
+using Application.Common.Interfaces;
+using Application.Common.Mailing;
+using Application.Common.Models;
+using Application.Common.Specification;
+using Application.Identity.Users;
+using Domain.Identity;
+using Infrastructure.Auth;
+using Infrastructure.Persistence.Context;
+using Shared.Authorization;
 
-namespace Template.Infrastructure.Identity;
+namespace Infrastructure.Identity;
 internal partial class UserService : IUserService
 {
     private readonly SignInManager<ApplicationUser> _signInManager;

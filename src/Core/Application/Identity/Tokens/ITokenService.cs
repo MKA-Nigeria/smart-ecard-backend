@@ -1,4 +1,4 @@
-namespace Template.Application.Identity.Tokens;
+namespace Application.Identity.Tokens;
 
 public interface ITokenService : ITransientService
 {

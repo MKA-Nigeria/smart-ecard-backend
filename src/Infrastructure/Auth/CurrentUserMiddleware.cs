@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Template.Infrastructure.Auth;
+namespace Infrastructure.Auth;
 public class CurrentUserMiddleware : IMiddleware
 {
     private readonly ICurrentUserInitializer _currentUserInitializer;

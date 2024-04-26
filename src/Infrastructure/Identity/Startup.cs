@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
-using Template.Infrastructure.Persistence.Context;
+using Infrastructure.Persistence.Context;
 
-namespace Template.Infrastructure.Identity;
+namespace Infrastructure.Identity;
 internal static class Startup
 {
     internal static IServiceCollection AddIdentity(this IServiceCollection services) =>

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace Template.Infrastructure.Identity;
+namespace Infrastructure.Identity;
 public class ApplicationRole : IdentityRole
 {
     public string? Description { get; set; }

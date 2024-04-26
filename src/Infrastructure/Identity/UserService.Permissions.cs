@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Template.Application.Common.Caching;
-using Template.Application.Common.Exceptions;
-using Template.Shared.Authorization;
+using Application.Common.Exceptions;
+using Shared;
+using Shared.Authorization;
 
-namespace Template.Infrastructure.Identity;
+namespace Infrastructure.Identity;
 internal partial class UserService
 {
     public async Task<List<string>> GetPermissionsAsync(string userId, CancellationToken cancellationToken)
@@ -14,12 +14,11 @@ internal partial class UserService
 
         var userRoles = await _userManager.GetRolesAsync(user);
         var permissions = new List<string>();
-        foreach (var role in await _roleManager.Roles
-            .Where(r => userRoles.Contains(r.Name!))
-            .ToListAsync(cancellationToken))
+        var roles = _roleManager.Roles.Where(r => userRoles.Contains(r.Name!)).ToListAsync(cancellationToken);
+        foreach (var role in await roles)
         {
             permissions.AddRange(await _db.RoleClaims
-                .Where(rc => rc.RoleId == role.Id && rc.ClaimType == FSHClaims.Permission)
+                .Where(rc => rc.RoleId == role.Id && rc.ClaimType == ClaimConstants.Permission)
                 .Select(rc => rc.ClaimValue!)
                 .ToListAsync(cancellationToken));
         }
@@ -30,7 +29,7 @@ internal partial class UserService
     public async Task<bool> HasPermissionAsync(string userId, string permission, CancellationToken cancellationToken)
     {
         var permissions = await _cache.GetOrSetAsync(
-            _cacheKeys.GetCacheKey(FSHClaims.Permission, userId),
+            _cacheKeys.GetCacheKey(ClaimConstants.Permission, userId),
             () => GetPermissionsAsync(userId, cancellationToken),
             cancellationToken: cancellationToken);
 
@@ -38,5 +37,5 @@ internal partial class UserService
     }
 
     public Task InvalidatePermissionCacheAsync(string userId, CancellationToken cancellationToken) =>
-        _cache.RemoveAsync(_cacheKeys.GetCacheKey(FSHClaims.Permission, userId), cancellationToken);
+        _cache.RemoveAsync(_cacheKeys.GetCacheKey(ClaimConstants.Permission, userId), cancellationToken);
 }

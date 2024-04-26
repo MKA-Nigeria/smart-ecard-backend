@@ -1,4 +1,4 @@
-namespace Template.Application.Identity.Users;
+namespace Application.Identity.Users;
 
 public class UserDetailsDto
 {

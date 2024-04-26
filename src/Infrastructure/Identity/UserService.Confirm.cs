@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using System.Text;
-using Template.Application.Common.Exceptions;
-using Template.Infrastructure.Common;
-using Template.Shared.Multitenancy;
+using Application.Common.Exceptions;
+using Infrastructure.Common;
+using Shared.Multitenancy;
 
-namespace Template.Infrastructure.Identity;
+namespace Infrastructure.Identity;
 internal partial class UserService
 {
     private async Task<string> GetEmailVerificationUriAsync(ApplicationUser user, string origin)

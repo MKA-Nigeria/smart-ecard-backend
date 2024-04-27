@@ -12,6 +12,8 @@ using System.IdentityModel.Tokens.Jwt;
 using Application.Gateway;
 using System.Text.Json;
 using Newtonsoft.Json;
+using Shared.Authorization;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace Infrastructure.Identity;
 internal class TokenService : ITokenService
@@ -54,6 +56,22 @@ internal class TokenService : ITokenService
 
             if (userData is not null)
             {
+                user.Email = userData.Email;
+                user.FirstName = userData.FirstName;
+                user.LastName = userData.LastName;
+                user.UserName = userData.Username;
+                user.PhoneNumber = userData.PhoneNumber;
+                user.IsActive = true;
+                user.EmailConfirmed = true;
+
+                var result = await _userManager.CreateAsync(user, request.Password);
+                if (!result.Succeeded)
+                {
+                    throw new InternalServerException("Validation Error Occured", errors: result.Errors.Select(x => x.Description).ToList());
+                }
+
+                await _userManager.AddToRoleAsync(user, Roles.Basic);
+
             }
             else {
                 throw new UnauthorizedException("Authentication Failed.");
@@ -168,8 +186,10 @@ public class UserData
 {
     public int UserId { get; set; }
     public string Username { get; set; }
+    public string PhoneNumber { get; set; }
     public string Password { get; set; }
     public string Fullname { get; set; }
-    public string Surname { get; set; }
-    public string Firstname { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
 }

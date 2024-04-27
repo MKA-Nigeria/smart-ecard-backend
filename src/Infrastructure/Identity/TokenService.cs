@@ -9,6 +9,9 @@ using Infrastructure.Auth;
 using Infrastructure.Auth.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using Application.Gateway;
+using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace Infrastructure.Identity;
 internal class TokenService : ITokenService
@@ -16,23 +19,45 @@ internal class TokenService : ITokenService
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SecuritySettings _securitySettings;
     private readonly JwtSettings _jwtSettings;
+    private readonly IGatewayHandler _gatewayHandler;
 
     public TokenService(
         UserManager<ApplicationUser> userManager,
         IOptions<JwtSettings> jwtSettings,
-        IOptions<SecuritySettings> securitySettings)
+        IOptions<SecuritySettings> securitySettings,
+        IGatewayHandler gatewayHandler)
     {
         _userManager = userManager;
         _jwtSettings = jwtSettings.Value;
         _securitySettings = securitySettings.Value;
+        _gatewayHandler = gatewayHandler;
     }
 
     public async Task<TokenResponse> GetTokenAsync(TokenRequest request, CancellationToken cancellationToken)
     {
-
-        if (await _userManager.FindByNameAsync(request.UserName.Trim().Normalize()) is not { } user)
+        var user = await _userManager.FindByNameAsync(request.UserName.Trim().Normalize());
+        if (user is null)
         {
-            throw new UnauthorizedException("Authentication Failed.");
+            var json = await _gatewayHandler.GetEntityAsync(request.UserName.Trim().Normalize());
+            string jsonString = JsonConvert.SerializeObject(json);
+            UserData userData;
+            try
+            {
+                userData = JsonConvert.DeserializeObject<UserData>(jsonString);
+            }
+            catch (System.Text.Json.JsonException ex)
+            {
+                Console.WriteLine($"JSON parsing error: {ex.Message}");
+                // Handle or rethrow the exception as appropriate
+                throw;
+            }
+
+            if (userData is not null)
+            {
+            }
+            else {
+                throw new UnauthorizedException("Authentication Failed.");
+            }
         }
 
         if (!user.IsActive)
@@ -137,4 +162,14 @@ internal class TokenService : ITokenService
         byte[] secret = Encoding.UTF8.GetBytes(_jwtSettings.Key);
         return new SigningCredentials(new SymmetricSecurityKey(secret), SecurityAlgorithms.HmacSha256);
     }
+}
+
+public class UserData
+{
+    public int UserId { get; set; }
+    public string Username { get; set; }
+    public string Password { get; set; }
+    public string Fullname { get; set; }
+    public string Surname { get; set; }
+    public string Firstname { get; set; }
 }

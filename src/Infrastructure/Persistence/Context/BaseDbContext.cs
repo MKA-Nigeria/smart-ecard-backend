@@ -10,6 +10,7 @@ using Application.Common.Events;
 using Domain.Common.Contracts;
 using Infrastructure.Auditing;
 using Domain.Cards;
+using Domain.Entities;
 
 namespace Infrastructure.Persistence.Context;
 public abstract class BaseDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>, IdentityUserRole<string>, IdentityUserLogin<string>, ApplicationRoleClaim, IdentityUserToken<string>>
@@ -33,6 +34,8 @@ public abstract class BaseDbContext : IdentityDbContext<ApplicationUser, Applica
 
     public DbSet<Trail> AuditTrails => Set<Trail>();
     public DbSet<CardRequest> CardRequests => Set<CardRequest>();
+    public DbSet<AppSetting> AppSettings => Set<AppSetting>();
+    public DbSet<AppConfiguration> AppConfigurations => Set<AppConfiguration>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

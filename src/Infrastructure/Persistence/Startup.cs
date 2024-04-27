@@ -1,4 +1,6 @@
+using Infrastructure.Common;
 using Infrastructure.Persistence.Context;
+using Infrastructure.Persistence.Initialization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,23 +22,26 @@ internal static class Startup
             })
             .ValidateDataAnnotations()
             .ValidateOnStart();
-
         return services
-            /*.AddDbContext<ApplicationDbContext>((p, m) =>
+            .AddDbContext<ApplicationDbContext>((p, m) =>
             {
                 var databaseSettings = p.GetRequiredService<IOptions<DatabaseSettings>>().Value;
-                m.UseDatabase(databaseSettings.DBProvider, databaseSettings.ConnectionString);
-            })*/
+                m.UseDatabase(databaseSettings.ConnectionString);
+            })
 
-           /* .AddTransient<IDatabaseInitializer, DatabaseInitializer>()
+            .AddTransient<IDatabaseInitializer, DatabaseInitializer>()
             .AddTransient<ApplicationDbInitializer>()
             .AddTransient<ApplicationDbSeeder>()
             .AddServices(typeof(ICustomSeeder), ServiceLifetime.Transient)
-            .AddTransient<CustomSeederRunner>()*/
+            .AddTransient<CustomSeederRunner>()
 
             .AddRepositories();
     }
 
+    internal static DbContextOptionsBuilder UseDatabase(this DbContextOptionsBuilder builder, string connectionString)
+    {
+        return builder.UseSqlServer(connectionString);
+    }
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         // Add Repositories

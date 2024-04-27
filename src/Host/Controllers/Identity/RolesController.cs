@@ -12,7 +12,7 @@ public class RolesController : VersionNeutralApiController
     public RolesController(IRoleService roleService) => _roleService = roleService;
 
     [HttpGet]
-    [MustHavePermission(AppAction.View, AppResource.Roles)]
+    [MustHavePermission(AppAction.View, Resource.Roles)]
     [OpenApiOperation("Get a list of all roles.", "")]
     public Task<List<RoleDto>> GetListAsync(CancellationToken cancellationToken)
     {
@@ -20,7 +20,7 @@ public class RolesController : VersionNeutralApiController
     }
 
     [HttpGet("{id}")]
-    [MustHavePermission(AppAction.View, AppResource.Roles)]
+    [MustHavePermission(AppAction.View, Resource.Roles)]
     [OpenApiOperation("Get role details.", "")]
     public Task<RoleDto> GetByIdAsync(string id)
     {
@@ -28,7 +28,7 @@ public class RolesController : VersionNeutralApiController
     }
 
     [HttpGet("{id}/permissions")]
-    [MustHavePermission(AppAction.View, AppResource.RoleClaims)]
+    [MustHavePermission(AppAction.View, Resource.RoleClaims)]
     [OpenApiOperation("Get role details with its permissions.", "")]
     public Task<RoleDto> GetByIdWithPermissionsAsync(string id, CancellationToken cancellationToken)
     {
@@ -36,7 +36,7 @@ public class RolesController : VersionNeutralApiController
     }
 
     [HttpPut("{id}/permissions")]
-    [MustHavePermission(AppAction.Update, AppResource.RoleClaims)]
+    [MustHavePermission(AppAction.Update, Resource.RoleClaims)]
     [OpenApiOperation("Update a role's permissions.", "")]
     public async Task<ActionResult<string>> UpdatePermissionsAsync(string id, UpdateRolePermissionsRequest request, CancellationToken cancellationToken)
     {
@@ -49,7 +49,7 @@ public class RolesController : VersionNeutralApiController
     }
 
     [HttpPost]
-    [MustHavePermission(AppAction.Create, AppResource.Roles)]
+    [MustHavePermission(AppAction.Create, Resource.Roles)]
     [OpenApiOperation("Create or update a role.", "")]
     public Task<string> RegisterRoleAsync(CreateOrUpdateRoleRequest request)
     {
@@ -57,7 +57,7 @@ public class RolesController : VersionNeutralApiController
     }
 
     [HttpDelete("{id}")]
-    [MustHavePermission(AppAction.Delete, AppResource.Roles)]
+    [MustHavePermission(AppAction.Delete, Resource.Roles)]
     [OpenApiOperation("Delete a role.", "")]
     public Task<string> DeleteAsync(string id)
     {

@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Infrastructure.Persistence.Context;
+using Application.Auditing;
+using Mapster;
 
 namespace Infrastructure.Auditing;
 public class AuditService : IAuditService

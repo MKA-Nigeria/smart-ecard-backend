@@ -109,13 +109,14 @@ internal partial class UserService
             LastName = request.LastName,
             UserName = request.UserName,
             PhoneNumber = request.PhoneNumber,
-            IsActive = true
+            IsActive = true,
+            EmailConfirmed = true
         };
 
         var result = await _userManager.CreateAsync(user, request.Password);
         if (!result.Succeeded)
         {
-            throw new InternalServerException("Validation Errors Occurred.");
+            throw new InternalServerException("Validation Error Occured", errors: result.Errors.Select(x => x.Description).ToList());
         }
 
         await _userManager.AddToRoleAsync(user, Roles.Basic);
@@ -132,12 +133,12 @@ internal partial class UserService
                 UserName = user.UserName,
                 Url = emailVerificationUri
             };
-            var mailRequest = new MailRequest(
+           /* var mailRequest = new MailRequest(
                 new List<string> { user.Email },
                 "Confirm Registration",
                 _templateService.GenerateEmailTemplate("email-confirmation", eMailModel));
            // _jobService.Enqueue(() => _mailService.SendAsync(mailRequest, CancellationToken.None));
-            messages.Add($"Please check {user.Email} to verify your account!");
+            messages.Add($"Please check {user.Email} to verify your account!");*/
         }
 
         await _events.PublishAsync(new ApplicationUserCreatedEvent(user.Id));

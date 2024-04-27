@@ -57,18 +57,6 @@ public class UsersController : VersionNeutralApiController
         return _userService.CreateAsync(request, GetOriginFromRequest());
     }
 
-    [HttpPost("self-register")]
-    [AllowAnonymous]
-    [OpenApiOperation("Anonymous user creates a user.", "")]
-    [ApiConventionMethod(typeof(ApiConventions), nameof(ApiConventions.Register))]
-    public Task<string> SelfRegisterAsync(CreateUserRequest request)
-    {
-        // TODO: check if registering anonymous users is actually allowed (should probably be an appsetting)
-        // and return UnAuthorized when it isn't
-        // Also: add other protection to prevent automatic posting (captcha?)
-        return _userService.CreateAsync(request, GetOriginFromRequest());
-    }
-
     [HttpPost("{id}/toggle-status")]
     [MustHavePermission(AppAction.Update, Resource.Users)]
     [ApiConventionMethod(typeof(ApiConventions), nameof(ApiConventions.Register))]

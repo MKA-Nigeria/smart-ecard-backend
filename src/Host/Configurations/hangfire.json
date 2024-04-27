@@ -20,7 +20,7 @@
       "WorkerCount": 5
     },
     "Storage": {
-      "StorageProvider": "postgresql",
+      "StorageProvider": "mssql",
       "ConnectionString": "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=TEST; Integrated Security=True; Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Trusted_Connection=True",
       "Options": {
         "CommandBatchMaxTimeout": "00:05:00",

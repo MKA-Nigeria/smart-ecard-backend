@@ -36,7 +36,7 @@ public static class Startup
             .AddCorsPolicy(config)
             .AddExceptionMiddleware()
             //.AddBehaviours(applicationAssembly)
-            //.AddHealthCheck()
+            .AddHealthCheck()
             .AddMailing(config)
             .AddMediatR(Assembly.GetExecutingAssembly())
              //.AddNotifications(config)
@@ -46,6 +46,9 @@ public static class Startup
             .AddRouting(options => options.LowercaseUrls = true)
             .AddServices();
     }
+
+    private static IServiceCollection AddHealthCheck(this IServiceCollection services) =>
+       services.AddHealthChecks().Services;
 
     private static IServiceCollection AddApiVersioning(this IServiceCollection services) =>
         services.AddApiVersioning(config =>

@@ -21,7 +21,7 @@
     },
     "Storage": {
       "StorageProvider": "postgresql",
-      "ConnectionString": "Host=localhost;Port=5432;Database=fshDb;Username=postgres;Password=admin;Include Error Detail=true",
+      "ConnectionString": "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=TEST; Integrated Security=True; Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Trusted_Connection=True",
       "Options": {
         "CommandBatchMaxTimeout": "00:05:00",
         "QueuePollInterval": "00:00:01",

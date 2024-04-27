@@ -1,6 +1,6 @@
 {
   "LoggerSettings": {
-    "AppName": "Template",
+    "AppName": "Smart e-Card",
     "ElasticSearchUrl": "http://localhost:9200",
     "WriteToFile": true,
     "StructuredConsoleLogging": false

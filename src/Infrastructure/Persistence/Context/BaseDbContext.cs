@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Application.Common.Events;
 using Domain.Common.Contracts;
 using Infrastructure.Auditing;
+using Domain.Cards;
 
 namespace Infrastructure.Persistence.Context;
 public abstract class BaseDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>, IdentityUserRole<string>, IdentityUserLogin<string>, ApplicationRoleClaim, IdentityUserToken<string>>
@@ -31,6 +32,7 @@ public abstract class BaseDbContext : IdentityDbContext<ApplicationUser, Applica
     public IDbConnection Connection => Database.GetDbConnection();
 
     public DbSet<Trail> AuditTrails => Set<Trail>();
+    public DbSet<CardRequest> CardRequests => Set<CardRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

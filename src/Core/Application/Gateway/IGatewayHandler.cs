@@ -1,6 +1,8 @@
-﻿namespace Application.Gateway;
+﻿using Application.Identity.Tokens;
+
+namespace Application.Gateway;
 public interface IGatewayHandler
 {
-    Task<dynamic> ExternalLoginAsync(string username, string password);
+    Task<dynamic> ExternalLoginAsync(TokenRequest request);
     Task<dynamic> GetEntityAsync(string entityId);
 }

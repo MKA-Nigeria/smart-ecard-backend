@@ -9,6 +9,8 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;
+using System.Dynamic;
+using Application.Identity.Tokens;
 
 namespace Infrastructure.Gateway;
 public class GatewayHandler : IGatewayHandler
@@ -25,28 +27,24 @@ public class GatewayHandler : IGatewayHandler
         _baseApiPath = "https://tajneedapi.ahmadiyyanigeria.net/";
     }
 
-    public async Task<dynamic> ExternalLoginAsync(string username, string password)
+    public async Task<dynamic> ExternalLoginAsync(TokenRequest request)
     {
-        var request = new {UserName = username, Password = password};
         var url = $"{_baseApiPath}{"token"}";
-        var content = new StringContent(JsonSerializer.Serialize(request), Encoding.UTF8, "application/json");
+        var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
         var requestMessage = new HttpRequestMessage();
         requestMessage.RequestUri = new Uri(url);
         requestMessage.Method = HttpMethod.Post;
         requestMessage.Headers.Add("ApiKey", _config.GetSection("ApiKey").Value);
         requestMessage.Content = content;
 
-        var response = await _client.SendAsync(requestMessage);
-        if (response.StatusCode.Equals(HttpStatusCode.OK))
+        var jsonResponse = await _client.SendAsync(requestMessage);
+
+        if (!jsonResponse.IsSuccessStatusCode)
         {
-            return await response.ReadContentAs<dynamic>();
-        }
-        else if (response.StatusCode.Equals(HttpStatusCode.BadRequest))
-        {
-            return await response.ReadContentAs<dynamic>();
+            return null;
         }
 
-        throw new Exception(response.StatusCode.ToString());
+        return await jsonResponse.Content.ReadAsStringAsync();
     }
 
     public async Task<dynamic> GetEntityAsync(string entityId)
@@ -65,16 +63,5 @@ public class GatewayHandler : IGatewayHandler
             Converters = { new ExpandoObjectConverter() }
         });
         return data;
-
-        //var response = await _client.SendAsync(request);
-        //if (response.StatusCode.Equals(HttpStatusCode.OK))
-        //{
-        //    return await response.ReadContentAs<dynamic>();
-        //}
-        //else if (response.StatusCode.Equals(HttpStatusCode.NotFound))
-        //{
-        //    return await response.ReadContentAs<dynamic>();
-        //}
-        //throw new Exception(response.StatusCode.ToString());
     }
 }

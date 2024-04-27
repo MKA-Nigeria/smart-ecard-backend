@@ -14,6 +14,7 @@ using System.Text.Json;
 using Newtonsoft.Json;
 using Shared.Authorization;
 using DocumentFormat.OpenXml.Wordprocessing;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace Infrastructure.Identity;
 internal class TokenService : ITokenService
@@ -38,7 +39,35 @@ internal class TokenService : ITokenService
     public async Task<TokenResponse> GetTokenAsync(TokenRequest request, CancellationToken cancellationToken)
     {
         var user = await _userManager.FindByNameAsync(request.UserName.Trim().Normalize());
-        if (user is null)
+        if (user is not null)
+        {
+            bool isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (!isPasswordValid)
+            {
+                // check external authentication
+                var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
+                LoginResponse loginData;
+                try
+                {
+                    loginData = JsonConvert.DeserializeObject<LoginResponse>(loginJsonString);
+                }
+                catch (System.Text.Json.JsonException ex)
+                {
+                    throw new InvalidCastException($"JSON parsing error: {ex.Message}");
+                }
+
+                if (loginData != null)
+                {
+                    string code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    var result = await _userManager.ResetPasswordAsync(user, code!, request.Password!);
+                }
+                else
+                {
+                    throw new UnauthorizedException("Authentication Failed.");
+                }
+            }
+        }
+        else
         {
             var json = await _gatewayHandler.GetEntityAsync(request.UserName.Trim().Normalize());
             string jsonString = JsonConvert.SerializeObject(json);
@@ -49,31 +78,52 @@ internal class TokenService : ITokenService
             }
             catch (System.Text.Json.JsonException ex)
             {
-                Console.WriteLine($"JSON parsing error: {ex.Message}");
-                // Handle or rethrow the exception as appropriate
-                throw;
+                throw new InvalidCastException($"JSON parsing error: {ex.Message}");
             }
 
             if (userData is not null)
             {
-                user.Email = userData.Email;
-                user.FirstName = userData.FirstName;
-                user.LastName = userData.LastName;
-                user.UserName = userData.Username;
-                user.PhoneNumber = userData.PhoneNumber;
-                user.IsActive = true;
-                user.EmailConfirmed = true;
-
-                var result = await _userManager.CreateAsync(user, request.Password);
-                if (!result.Succeeded)
+                // check external authentication
+                var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
+                LoginResponse loginData;
+                try
                 {
-                    throw new InternalServerException("Validation Error Occured", errors: result.Errors.Select(x => x.Description).ToList());
+                    loginData = JsonConvert.DeserializeObject<LoginResponse>(loginJsonString);
+                }
+                catch (System.Text.Json.JsonException ex)
+                {
+                    throw new InvalidCastException($"JSON parsing error: {ex.Message}");
                 }
 
-                await _userManager.AddToRoleAsync(user, Roles.Basic);
+                if (loginData != null)
+                {
+                    var newUser = new ApplicationUser
+                    {
+                        Email = userData.Email,
+                        FirstName = userData.FirstName,
+                        LastName = userData.LastName,
+                        UserName = userData.Username,
+                        PhoneNumber = userData.PhoneNumber,
+                        IsActive = true,
+                        EmailConfirmed = true
+                    };
 
+                    var result = await _userManager.CreateAsync(newUser, request.Password);
+                    if (!result.Succeeded)
+                    {
+                        throw new InternalServerException("Validation Error Occured", errors: result.Errors.Select(x => x.Description).ToList());
+                    }
+
+                    await _userManager.AddToRoleAsync(newUser, Roles.Basic);
+                    user = newUser;
+                }
+                else
+                {
+                    throw new UnauthorizedException("Authentication Failed.");
+                }
             }
-            else {
+            else
+            {
                 throw new UnauthorizedException("Authentication Failed.");
             }
         }
@@ -192,4 +242,20 @@ public class UserData
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public string Email { get; set; }
+}
+
+public class LoginResponse
+{
+    public LoginData Data { get; set; }
+    public string Token { get; set; }
+    public string Expiry { get; set; }
+    public string Message { get; set; }
+    public bool Status { get; set; }
+}
+
+public class LoginData
+{
+    public int UserId { get; set; }
+    public string UserName { get; set; }
+    public List<string> Roles { get; set; }
 }

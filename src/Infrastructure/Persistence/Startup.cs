@@ -1,6 +1,8 @@
 using Application.Common.Persistence;
+using Application.Gateway;
 using Domain.Common.Contracts;
 using Infrastructure.Common;
+using Infrastructure.Gateway;
 using Infrastructure.Persistence.Context;
 using Infrastructure.Persistence.Initialization;
 using Infrastructure.Persistence.Repository;
@@ -49,6 +51,7 @@ internal static class Startup
     {
         // Add Repositories
         services.AddScoped(typeof(IRepository<>), typeof(ApplicationDbRepository<>));
+        services.AddScoped(typeof(IGatewayHandler), typeof(GatewayHandler));
 
         foreach (var aggregateRootType in
             typeof(IAggregateRoot).Assembly.GetExportedTypes()

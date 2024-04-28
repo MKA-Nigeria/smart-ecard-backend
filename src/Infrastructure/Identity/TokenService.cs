@@ -9,6 +9,12 @@ using Infrastructure.Auth;
 using Infrastructure.Auth.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
+using Application.Gateway;
+using System.Text.Json;
+using Newtonsoft.Json;
+using Shared.Authorization;
+using DocumentFormat.OpenXml.Wordprocessing;
+using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace Infrastructure.Identity;
 internal class TokenService : ITokenService
@@ -16,23 +22,110 @@ internal class TokenService : ITokenService
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SecuritySettings _securitySettings;
     private readonly JwtSettings _jwtSettings;
+    private readonly IGatewayHandler _gatewayHandler;
 
     public TokenService(
         UserManager<ApplicationUser> userManager,
         IOptions<JwtSettings> jwtSettings,
-        IOptions<SecuritySettings> securitySettings)
+        IOptions<SecuritySettings> securitySettings,
+        IGatewayHandler gatewayHandler)
     {
         _userManager = userManager;
         _jwtSettings = jwtSettings.Value;
         _securitySettings = securitySettings.Value;
+        _gatewayHandler = gatewayHandler;
     }
 
     public async Task<TokenResponse> GetTokenAsync(TokenRequest request, CancellationToken cancellationToken)
     {
-
-        if (await _userManager.FindByNameAsync(request.UserName.Trim().Normalize()) is not { } user)
+        var user = await _userManager.FindByNameAsync(request.UserName.Trim().Normalize());
+        if (user is not null)
         {
-            throw new UnauthorizedException("Authentication Failed.");
+            bool isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+            if (!isPasswordValid)
+            {
+                // check external authentication
+                var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
+                LoginResponse loginData;
+                try
+                {
+                    loginData = JsonConvert.DeserializeObject<LoginResponse>(loginJsonString);
+                }
+                catch (System.Text.Json.JsonException ex)
+                {
+                    throw new InvalidCastException($"JSON parsing error: {ex.Message}");
+                }
+
+                if (loginData != null)
+                {
+                    string code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                    var result = await _userManager.ResetPasswordAsync(user, code!, request.Password!);
+                }
+                else
+                {
+                    throw new UnauthorizedException("Authentication Failed.");
+                }
+            }
+        }
+        else
+        {
+            var json = await _gatewayHandler.GetEntityAsync(request.UserName.Trim().Normalize());
+            string jsonString = JsonConvert.SerializeObject(json);
+            UserData userData;
+            try
+            {
+                userData = JsonConvert.DeserializeObject<UserData>(jsonString);
+            }
+            catch (System.Text.Json.JsonException ex)
+            {
+                throw new InvalidCastException($"JSON parsing error: {ex.Message}");
+            }
+
+            if (userData is not null)
+            {
+                // check external authentication
+                var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
+                LoginResponse loginData;
+                try
+                {
+                    loginData = JsonConvert.DeserializeObject<LoginResponse>(loginJsonString);
+                }
+                catch (System.Text.Json.JsonException ex)
+                {
+                    throw new InvalidCastException($"JSON parsing error: {ex.Message}");
+                }
+
+                if (loginData != null)
+                {
+                    var newUser = new ApplicationUser
+                    {
+                        Email = userData.Email,
+                        FirstName = userData.FirstName,
+                        LastName = userData.LastName,
+                        UserName = userData.Username,
+                        PhoneNumber = userData.PhoneNumber,
+                        IsActive = true,
+                        EmailConfirmed = true
+                    };
+
+                    var result = await _userManager.CreateAsync(newUser, request.Password);
+                    if (!result.Succeeded)
+                    {
+                        throw new InternalServerException("Validation Error Occured", errors: result.Errors.Select(x => x.Description).ToList());
+                    }
+
+                    await _userManager.AddToRoleAsync(newUser, Roles.Basic);
+                    user = newUser;
+                }
+                else
+                {
+                    throw new UnauthorizedException("Authentication Failed.");
+                }
+            }
+            else
+            {
+                throw new UnauthorizedException("Authentication Failed.");
+            }
         }
 
         if (!user.IsActive)
@@ -137,4 +230,32 @@ internal class TokenService : ITokenService
         byte[] secret = Encoding.UTF8.GetBytes(_jwtSettings.Key);
         return new SigningCredentials(new SymmetricSecurityKey(secret), SecurityAlgorithms.HmacSha256);
     }
+}
+
+public class UserData
+{
+    public int UserId { get; set; }
+    public string Username { get; set; }
+    public string PhoneNumber { get; set; }
+    public string Password { get; set; }
+    public string Fullname { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public string Email { get; set; }
+}
+
+public class LoginResponse
+{
+    public LoginData Data { get; set; }
+    public string Token { get; set; }
+    public string Expiry { get; set; }
+    public string Message { get; set; }
+    public bool Status { get; set; }
+}
+
+public class LoginData
+{
+    public int UserId { get; set; }
+    public string UserName { get; set; }
+    public List<string> Roles { get; set; }
 }

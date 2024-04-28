@@ -1,5 +1,6 @@
 ﻿using Application.Card.CardRequests.Queries.Dto;
 using Application.Common.Models;
+using Domain.Cards;
 using Mapster;
 using System;
 using System.Collections.Generic;
@@ -20,5 +21,6 @@ public class SearchCardRequestHandler(IRepository<CardRequest> repository) : IRe
         var cardRequestsDto = cardRequests.Adapt<List<CardRequestDto>>();
         return new PaginationResponse<CardRequestDto>(cardRequestsDto, cardRequestsDto.Count, request.PageNumber, request.PageSize);
     }
+
 }
 

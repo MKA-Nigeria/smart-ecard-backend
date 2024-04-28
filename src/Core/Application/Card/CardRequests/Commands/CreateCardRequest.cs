@@ -28,7 +28,7 @@ public class CreateCardRequestHandler(IRepository<CardRequest> repository) : IRe
     private readonly IRepository<CardRequest> _repository = repository;
     public async Task<DefaultIdType> Handle(CreateCardRequest request, CancellationToken cancellationToken)
     {
-        var cardRequestData = new CardRequestData("Ajibike", "Ambaaq", DateTime.Now, "Monatan", "ambaaq@gmail.com", "08144875105", "ambaaq.png", Domain.Enums.Gender.Male);
+        var cardRequestData = new CardRequestData("Ajibike", "Ambaaq", DateTime.Now, "Monatan", "ambaaq@gmail.com", "08144875105", "ambaaq.png", Domain.Enums.Gender.Male, "", "");
 
         var customData = new Dictionary<string, object>();
 

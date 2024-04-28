@@ -13,7 +13,9 @@ public class CardRequestData
     public string? PhoneNumber { get; }
     public string PhotoUrl { get; }
     public Gender Gender { get; }
-    public CardRequestData(string firstName, string lastName, DateTime dateOfBirth, string address, string? email, string? phoneNumber, string photoUrl, Gender gender)
+    public string BloodGroup{ get; }
+    public string Genotype{ get; }
+    public CardRequestData(string firstName, string lastName, DateTime dateOfBirth, string address, string? email, string? phoneNumber, string photoUrl, Gender gender, string bloodGroup, string genotype)
     {
         FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
         LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
@@ -23,6 +25,8 @@ public class CardRequestData
         PhoneNumber = phoneNumber;
         PhotoUrl = photoUrl ?? throw new ArgumentNullException(nameof(photoUrl));
         Gender = gender;
+        BloodGroup = bloodGroup;
+        Genotype = genotype;
     }
 
     private CardRequestData()

@@ -17,6 +17,7 @@ public static class AppAction
 public static class Resource
 {
     public const string Users = nameof(Users);
+    public const string CardRequest = nameof(CardRequest);
     public const string UserRoles = nameof(UserRoles);
     public const string Roles = nameof(Roles);
     public const string RoleClaims = nameof(RoleClaims);
@@ -32,14 +33,21 @@ public static class Permissions
         new("Update Users", AppAction.Update, Resource.Users),
         new("Delete Users", AppAction.Delete, Resource.Users),
         new("Export Users", AppAction.Export, Resource.Users),
+
         new("View UserRoles", AppAction.View, Resource.UserRoles),
         new("Update UserRoles", AppAction.Update, Resource.UserRoles),
+
         new("View Roles", AppAction.View, Resource.Roles),
         new("Create Roles", AppAction.Create, Resource.Roles),
         new("Update Roles", AppAction.Update, Resource.Roles),
         new("Delete Roles", AppAction.Delete, Resource.Roles),
         new("View RoleClaims", AppAction.View, Resource.RoleClaims),
         new("Update RoleClaims", AppAction.Update, Resource.RoleClaims),
+
+        new("View CardRequest", AppAction.View, Resource.CardRequest),
+        new("Search CardRequest", AppAction.Search, Resource.CardRequest),
+        new("Create CardRequest", AppAction.Create, Resource.CardRequest),
+        new("Update CardRequest", AppAction.Update, Resource.CardRequest),
     ];
 
     public static IReadOnlyList<Permission> All { get; } = new ReadOnlyCollection<Permission>(_all);

@@ -19,9 +19,8 @@ public class CardRequest : AuditableEntity, IAggregateRoot
 
     private CardRequest() { }
 
-    public CardRequest(Guid requestId, string externalId, BiometricData? biometrics, CardRequestData cardRequestData, IDictionary<string, object> customData)
+    public CardRequest(string externalId, BiometricData? biometrics, CardRequestData cardRequestData, IDictionary<string, object> customData)
     {
-        Id = requestId;
         ExternalId = externalId;
         RequestDate = DateTime.UtcNow;
         Status = CardRequestStatus.Pending;

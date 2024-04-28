@@ -1,7 +1,6 @@
 ﻿using Application.Common.Persistence;
 using Domain.Common.Contracts;
 using Infrastructure.Persistence.Context;
-using Mapster;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -74,7 +73,8 @@ public class ApplicationDbRepository<T>(ApplicationDbContext dbContext) : IReadR
     // Get the first or default entity matching the predicate
     public async Task<T?> FirstOrDefaultAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
     {
-        return await _context.Set<T>().FirstOrDefaultAsync(predicate, cancellationToken);
+        var x = await _context.Set<T>().FirstOrDefaultAsync(predicate, cancellationToken);
+        return x; 
     }
 
     // Get a specific projection of the first or default entity matching the predicate

@@ -88,4 +88,22 @@ public class GatewayHandler : IGatewayHandler
         });
         return data;
     }
+
+    public async Task<dynamic> GetEntityAsync(string url, string entityId)
+    {
+        url = $"{url}{entityId}";
+        var request = new HttpRequestMessage()
+        {
+            RequestUri = new Uri(url),
+            Method = HttpMethod.Get
+        };
+        request.Headers.Add("ApiKey", _config.GetSection("ApiKey").Value);
+        string jsonResponse = await _client.GetStringAsync(url);
+        dynamic data = JsonConvert.DeserializeObject<dynamic>(jsonResponse, new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Auto,
+            Converters = { new ExpandoObjectConverter() }
+        });
+        return data;
+    }
 }

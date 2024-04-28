@@ -5,17 +5,17 @@ namespace Domain.Cards;
 
 public class CardRequestData
 {
-    public string FirstName { get; }
-    public string LastName { get; }
-    public DateTime DateOfBirth { get; }
-    public string Address { get; }
-    public string? Email { get; }
-    public string? PhoneNumber { get; }
-    public string PhotoUrl { get; }
-    public Gender Gender { get; }
-    public string BloodGroup{ get; }
-    public string Genotype{ get; }
-    public CardRequestData(string firstName, string lastName, DateTime dateOfBirth, string address, string? email, string? phoneNumber, string photoUrl, Gender gender, string bloodGroup, string genotype)
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
+    public DateTime DateOfBirth { get; set; }
+    public string Address { get; set; }
+    public string? Email { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string PhotoUrl { get; set; }
+    public Gender Gender { get; set; }
+    public string? BloodGroup{ get; set; }
+    public string? Genotype{ get; set; }
+    public CardRequestData(string firstName, string lastName, DateTime dateOfBirth, string address, string? email, string? phoneNumber, string photoUrl, Gender gender, string? bloodGroup, string? genotype)
     {
         FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
         LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
@@ -29,7 +29,7 @@ public class CardRequestData
         Genotype = genotype;
     }
 
-    private CardRequestData()
+    public CardRequestData()
     {
     }
 }

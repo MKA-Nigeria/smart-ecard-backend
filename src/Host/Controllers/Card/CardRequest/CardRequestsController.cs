@@ -28,9 +28,9 @@ public class CardRequestsController : VersionNeutralApiController
     }
     
     [HttpGet("member/{id}")]
-    [MustHavePermission(AppAction.Search, Resource.CardRequest)]
+    //[MustHavePermission(AppAction.Search, Resource.CardRequest)]
     [OpenApiOperation("Get member information")]
-    public Task<CardRequestDto> GetMemberDataAsync(string id)
+    public Task<Dictionary<string, object>> GetMemberDataAsync(string id)
     {
         return Mediator.Send(new GetMemberRequest { EntityId = id });
     }

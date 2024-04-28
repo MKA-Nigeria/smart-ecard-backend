@@ -85,7 +85,7 @@ public class GatewayHandler : IGatewayHandler
     {
         var externalEntityUrl = await _configRepository.GetByExpressionAsync(x => x.Key == "ExternalEntityUrl");
         //var url = $"{_baseApiPath}users/{entityId}";
-        var url = externalEntityUrl.Value;
+        var url = $"{externalEntityUrl.Value}{entityId}";
         var request = new HttpRequestMessage()
         {
             RequestUri = new Uri(url),

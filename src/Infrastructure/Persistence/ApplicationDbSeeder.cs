@@ -1,22 +1,27 @@
-﻿using Infrastructure.Identity;
+﻿using Application.Common.Persistence;
+using Domain.Entities;
+using Infrastructure.Identity;
 using Infrastructure.Persistence.Context;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Shared.Authorization;
+using Shared.Configurations;
 
 namespace Infrastructure.Persistence.Initialization;
 internal class ApplicationDbSeeder
 {
     private readonly RoleManager<ApplicationRole> _roleManager;
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IRepository<AppConfiguration> _configRepository;
     private readonly CustomSeederRunner _seederRunner;
     private readonly ILogger<ApplicationDbSeeder> _logger;
 
-    public ApplicationDbSeeder(RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, CustomSeederRunner seederRunner, ILogger<ApplicationDbSeeder> logger)
+    public ApplicationDbSeeder(RoleManager<ApplicationRole> roleManager, UserManager<ApplicationUser> userManager, CustomSeederRunner seederRunner, ILogger<ApplicationDbSeeder> logger, IRepository<AppConfiguration> configRepository)
     {
         _roleManager = roleManager;
         _userManager = userManager;
+        _configRepository = configRepository;
         _seederRunner = seederRunner;
         _logger = logger;
     }
@@ -25,6 +30,7 @@ internal class ApplicationDbSeeder
     {
         await SeedRolesAsync(dbContext);
         await SeedAdminUserAsync();
+        await SeedConfigurationKeysAsync();
         await _seederRunner.RunSeedersAsync(cancellationToken);
     }
 
@@ -103,6 +109,22 @@ internal class ApplicationDbSeeder
         {
             _logger.LogInformation("Assigning Admin Role to Admin User");
             await _userManager.AddToRoleAsync(adminUser, Roles.Admin);
+        }
+    }
+
+    private async Task SeedConfigurationKeysAsync()
+    {
+        foreach (string key in ConfigurationKeys.DefaultConfigurationKeys)
+        {
+            if (await _configRepository.FirstOrDefaultAsync(r => r.Key == key)
+                is not AppConfiguration config)
+            {
+                // Create the appConfig
+                _logger.LogInformation("Seeding {key} AppConfiguration", key);
+                config = new AppConfiguration(key, "change from default");
+                await _configRepository.AddAsync(config);
+                await _configRepository.SaveChangesAsync();
+            }
         }
     }
 }

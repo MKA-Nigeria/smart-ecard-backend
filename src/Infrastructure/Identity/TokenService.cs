@@ -15,11 +15,17 @@ using Newtonsoft.Json;
 using Shared.Authorization;
 using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml.Spreadsheet;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using Shared.Helper;
+using Infrastructure.Auditing;
+using Application.Common.Persistence;
+using Domain.Entities;
 
 namespace Infrastructure.Identity;
 internal class TokenService : ITokenService
 {
     private readonly UserManager<ApplicationUser> _userManager;
+    private readonly IRepository<AppConfiguration> _configRepo;
     private readonly SecuritySettings _securitySettings;
     private readonly JwtSettings _jwtSettings;
     private readonly IGatewayHandler _gatewayHandler;
@@ -28,12 +34,14 @@ internal class TokenService : ITokenService
         UserManager<ApplicationUser> userManager,
         IOptions<JwtSettings> jwtSettings,
         IOptions<SecuritySettings> securitySettings,
-        IGatewayHandler gatewayHandler)
+        IGatewayHandler gatewayHandler,
+        IRepository<AppConfiguration> configRepo)
     {
         _userManager = userManager;
         _jwtSettings = jwtSettings.Value;
         _securitySettings = securitySettings.Value;
         _gatewayHandler = gatewayHandler;
+        _configRepo = configRepo;
     }
 
     public async Task<TokenResponse> GetTokenAsync(TokenRequest request, CancellationToken cancellationToken)
@@ -49,7 +57,7 @@ internal class TokenService : ITokenService
                 LoginResponse loginData;
                 try
                 {
-                    loginData = JsonConvert.DeserializeObject<LoginResponse>(loginJsonString);
+                    loginData = JsonConvert.DeserializeObject<dynamic>(loginJsonString);
                 }
                 catch (System.Text.Json.JsonException ex)
                 {
@@ -69,12 +77,10 @@ internal class TokenService : ITokenService
         }
         else
         {
-            var json = await _gatewayHandler.GetEntityAsync(request.UserName.Trim().Normalize());
-            string jsonString = JsonConvert.SerializeObject(json);
-            UserData userData;
+            dynamic userData;
             try
             {
-                userData = JsonConvert.DeserializeObject<UserData>(jsonString);
+                userData = await _gatewayHandler.GetEntityAsync(request.UserName.Trim().Normalize());
             }
             catch (System.Text.Json.JsonException ex)
             {
@@ -85,37 +91,54 @@ internal class TokenService : ITokenService
             {
                 // check external authentication
                 var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
-                LoginResponse loginData;
+                dynamic loginData;
                 try
                 {
-                    loginData = JsonConvert.DeserializeObject<LoginResponse>(loginJsonString);
+                    loginData = JsonConvert.DeserializeObject<dynamic>(loginJsonString);
                 }
                 catch (System.Text.Json.JsonException ex)
                 {
                     throw new InvalidCastException($"JSON parsing error: {ex.Message}");
                 }
 
+                var loginModelData = await _configRepo.FirstOrDefaultAsync(x => x.Key == "LoginData");
+                if(loginModelData == null || loginModelData.Value == null)
+                {
+                    throw new Exception($"Login Model Data not provided");
+                }
+
+                // Deserialize the JSON string into a dictionary
+                Dictionary<string, string> keyValuePairs = JsonConvert.DeserializeObject<Dictionary<string, string>>(loginModelData.Value);
+
                 if (loginData != null)
                 {
-                    var newUser = new ApplicationUser
+                    try
                     {
-                        Email = userData.Email,
-                        FirstName = userData.FirstName,
-                        LastName = userData.LastName,
-                        UserName = userData.Username,
-                        PhoneNumber = userData.PhoneNumber,
-                        IsActive = true,
-                        EmailConfirmed = true
-                    };
+                        var newUser = new ApplicationUser
+                        {
+                            Email = userData[keyValuePairs["Email"]],
+                            FirstName = userData[keyValuePairs["FirstName"]],
+                            LastName = userData[keyValuePairs["LastName"]],
+                            UserName = userData[keyValuePairs["UserName"]],
+                            PhoneNumber = userData[keyValuePairs["PhoneNumber"]],
+                            IsActive = true,
+                            EmailConfirmed = true
+                        };
 
-                    var result = await _userManager.CreateAsync(newUser, request.Password);
-                    if (!result.Succeeded)
-                    {
-                        throw new InternalServerException("Validation Error Occured", errors: result.Errors.Select(x => x.Description).ToList());
+                        var result = await _userManager.CreateAsync(newUser, request.Password);
+                        if (!result.Succeeded)
+                        {
+                            throw new InternalServerException("Validation Error Occured", errors: result.Errors.Select(x => x.Description).ToList());
+                        }
+
+                        await _userManager.AddToRoleAsync(newUser, Roles.Basic);
+                        user = newUser;
                     }
-
-                    await _userManager.AddToRoleAsync(newUser, Roles.Basic);
-                    user = newUser;
+                    catch (KeyNotFoundException ex)
+                    {
+                        // Handle the exception when a key is missing
+                        throw new KeyNotFoundException($"Error creating user: Missing key - {ex.Message}");
+                    }
                 }
                 else
                 {
@@ -230,18 +253,6 @@ internal class TokenService : ITokenService
         byte[] secret = Encoding.UTF8.GetBytes(_jwtSettings.Key);
         return new SigningCredentials(new SymmetricSecurityKey(secret), SecurityAlgorithms.HmacSha256);
     }
-}
-
-public class UserData
-{
-    public int UserId { get; set; }
-    public string Username { get; set; }
-    public string PhoneNumber { get; set; }
-    public string Password { get; set; }
-    public string Fullname { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public string Email { get; set; }
 }
 
 public class LoginResponse

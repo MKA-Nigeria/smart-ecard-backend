@@ -77,12 +77,10 @@ internal class TokenService : ITokenService
         }
         else
         {
-            var json = await _gatewayHandler.GetEntityAsync(request.UserName.Trim().Normalize());
-            string jsonString = JsonConvert.SerializeObject(json);
             dynamic userData;
             try
             {
-                userData = JsonConvert.DeserializeObject<dynamic>(jsonString);
+                userData = await _gatewayHandler.GetEntityAsync(request.UserName.Trim().Normalize());
             }
             catch (System.Text.Json.JsonException ex)
             {
@@ -92,16 +90,17 @@ internal class TokenService : ITokenService
             if (userData is not null)
             {
                 // check external authentication
-                /* var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
-                 dynamic loginData;
-                 try
-                 {
-                     loginData = JsonConvert.DeserializeObject<dynamic>(loginJsonString);
-                 }
-                 catch (System.Text.Json.JsonException ex)
-                 {
-                     throw new InvalidCastException($"JSON parsing error: {ex.Message}");
-                 }*/
+                var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
+                dynamic loginData;
+                try
+                {
+                    loginData = JsonConvert.DeserializeObject<dynamic>(loginJsonString);
+                }
+                catch (System.Text.Json.JsonException ex)
+                {
+                    throw new InvalidCastException($"JSON parsing error: {ex.Message}");
+                }
+
                 var loginModelData = await _configRepo.FirstOrDefaultAsync(x => x.Key == "LoginData");
                 if(loginModelData == null || loginModelData.Value == null)
                 {
@@ -111,7 +110,7 @@ internal class TokenService : ITokenService
                 // Deserialize the JSON string into a dictionary
                 Dictionary<string, string> keyValuePairs = JsonConvert.DeserializeObject<Dictionary<string, string>>(loginModelData.Value);
 
-                if (userData != null)
+                if (loginData != null)
                 {
                     try
                     {

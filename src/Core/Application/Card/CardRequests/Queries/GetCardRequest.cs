@@ -1,5 +1,6 @@
 ﻿using Application.Card.CardRequests.Commands;
 using Application.Card.CardRequests.Queries.Dto;
+using Application.Common.Interfaces;
 using Application.Common.Models;
 using Mapster;
 using System;
@@ -26,8 +27,14 @@ public class GetCardRequestHandler(IRepository<CardRequest> repository) : IReque
     public async Task<CardRequestDto> Handle(GetCardRequest request, CancellationToken cancellationToken)
     {
         var cardRequest = await repository.GetByExpressionAsync(x => x.Id == request.CardRequestId, cancellationToken);
-        var cardRequestDto = cardRequest.Adapt<CardRequestDto>();
-
+        var cardRequestDto = new CardRequestDto
+        {
+            MemberData = cardRequest.CardData.Adapt<MemberData>(),
+            ExternalId = cardRequest.ExternalId,
+            Id = cardRequest.Id,
+            Status = cardRequest.Status
+        };
+        cardRequestDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
         return cardRequestDto;
     }
 }

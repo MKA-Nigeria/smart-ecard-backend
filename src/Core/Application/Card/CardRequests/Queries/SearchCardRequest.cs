@@ -21,16 +21,21 @@ public class SearchCardRequestHandler(IRepository<CardRequest> repository) : IRe
         {
             cardRequests = cardRequests.Where(cardRequest => cardRequest.CustomData.Any(kv => kv.Key.Contains(request.Key, StringComparison.CurrentCultureIgnoreCase) && kv.Value.Contains(request.Value, StringComparison.CurrentCultureIgnoreCase))).ToList();
         }
-        var cardRequestsDto = cardRequests.ConvertAll(request => new CardRequestDto
+
+        List<CardRequestDto> cardRequestsDto = cardRequests.ConvertAll(cardRequest =>
         {
-            MemberData = request.CardData.Adapt<MemberData>(),
-            ExternalId = request.ExternalId,
-            Id = request.Id,
-            Status = request.Status
+            var cardRequestDto = new CardRequestDto
+            {
+                MemberData = cardRequest.CardData.Adapt<MemberData>(),
+                ExternalId = cardRequest.ExternalId,
+                Id = cardRequest.Id,
+                Status = cardRequest.Status
+            };
+
+            cardRequestDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
+
+            return cardRequestDto;
         });
-
-        cardRequestsDto.ForEach(dto => dto.MemberData.CustomData = dto.MemberData.CustomData.ToDictionary());
-
         return new PaginationResponse<CardRequestDto>(cardRequestsDto, cardRequestsDto.Count, request.PageNumber, request.PageSize);
     }
 }

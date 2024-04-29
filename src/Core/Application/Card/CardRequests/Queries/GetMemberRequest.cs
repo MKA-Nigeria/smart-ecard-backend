@@ -9,19 +9,20 @@ using Mapster;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections;
+using System.Net;
 using System.Text.Json.Nodes;
 
 namespace Application.Card.CardRequests.Queries;
-public class GetMemberRequest : IRequest<Dictionary<string, object>>
+public class GetMemberRequest : IRequest<MemberData>
 {
     public string EntityId { get; set; } = default!;
 }
-public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppConfiguration> configRepo) : IRequestHandler<GetMemberRequest, Dictionary<string, object>>
+public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppConfiguration> configRepo) : IRequestHandler<GetMemberRequest, MemberData>
 {
 
     private readonly IRepository<AppConfiguration> _configRepo = configRepo;
     private readonly IGatewayHandler _gateway = gateway;
-    public async Task<Dictionary<string, object>> Handle(GetMemberRequest request, CancellationToken cancellationToken)
+    public async Task<MemberData> Handle(GetMemberRequest request, CancellationToken cancellationToken)
     {
         var data = await _gateway.GetEntityAsync(request.EntityId);
         _ = data ?? throw new NotFoundException("Member not found");
@@ -39,17 +40,18 @@ public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppCon
         var gender = (data[userData["Gender"]] == "M") ? Gender.Male : Gender.Female;
         DateTime date = data[userData["DateOfBirth"]];
 
-        var memberData = new Dictionary<string, object>()
-            {
-                { "FirstName", (string)data[userData["FirstName"]]},
-                { "LastName", (string)data[userData["LastName"]]},
-                { "DateOfBirth", date},
-                { "Gender", gender},
-                { "Address", (string)data[userData["Address"]]},
-                { "Email", (string)data[userData["Email"]]},
-                { "PhoneNumber", (string)data[userData["PhoneNumber"]]}
-            };
-
+        var memberData = new MemberData
+        {
+            FirstName = (string)data[userData["FirstName"]],
+            LastName = (string)data[userData["LastName"]],
+            DateOfBirth = date,
+            Gender = gender.ToString(),
+            Address = (string)data[userData["Address"]],
+            Email = (string)data[userData["Email"]],
+            PhoneNumber = (string)data[userData["PhoneNumber"]],
+            MiddleName = (string)data[userData["MiddleName"]],
+            EntityId = request.EntityId
+        };
         var appDomain = await _configRepo.FirstOrDefaultAsync(x => x.Key == "AppDomain");
         var userDataValue = await _configRepo.FirstOrDefaultAsync(x => x.Key == "UseSubDomain");
         if (userDataValue == null)
@@ -66,12 +68,17 @@ public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppCon
             var bbb = JsonConvert.DeserializeObject<Dictionary<string, string>>(loginData);
             var url = bbb[(string)checkKey];
             var additionalData = await _gateway.GetEntityAsync(url, request.EntityId);
-            var addData = JsonConvert.DeserializeObject<Dictionary<string, object>>(dataModel.Value);
+            var additinalDataModel = userDataSett[(string)checkKey];
+
+            var model = JsonConvert.SerializeObject(additinalDataModel);
+
+            var addData = JsonConvert.DeserializeObject<Dictionary<string, object>>(model);
+            var existingData = new List<string>() { "FirstName", "LastName", "PhoneNumber", "Gender", "Address", "DateOfBirth", "Email" };
             foreach (var item in addData)
             {
-                if(!memberData.ContainsKey(item.Key))
+                if(!memberData.CustomData.ContainsKey(item.Key) && !existingData.Contains(item.Key))
                 {
-                    memberData.Add(item.Key, (string)additionalData[item.Value]);
+                    memberData.CustomData.Add(item.Key, (string)additionalData[item.Value]);
                 }
             }
 

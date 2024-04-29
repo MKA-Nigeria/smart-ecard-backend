@@ -12,14 +12,14 @@ public class CardRequest : AuditableEntity, IAggregateRoot
     public string? ReasonForRejection { get; private set; }
     public CardRequestData CardData { get; private set; }
     // other custom data
-    public IDictionary<string, object> CustomData { get; private set; }
+    public virtual IDictionary<string, string> CustomData { get; private set; }
 
     // Biometric data could be a complex type if more detail is needed
     public BiometricData? Biometrics { get; private set; }
 
     private CardRequest() { }
 
-    public CardRequest(string externalId, BiometricData? biometrics, CardRequestData cardRequestData, IDictionary<string, object> customData)
+    public CardRequest(string externalId, BiometricData? biometrics, CardRequestData cardRequestData, IDictionary<string, string> customData)
     {
         ExternalId = externalId;
         RequestDate = DateTime.UtcNow;

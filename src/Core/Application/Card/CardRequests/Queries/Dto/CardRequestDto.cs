@@ -11,4 +11,5 @@ public class CardRequestDto
     public Guid Id { get; set; }
     public string ExternalId { get; set; }
     public CardRequestStatus Status { get; set; }
+    public MemberData MemberData { get; set; }
 }

@@ -39,7 +39,7 @@ public class CardRequestConfiguration : IEntityTypeConfiguration<CardRequest>
         builder.Property(e => e.CustomData)
             .HasConversion(
                 v => JsonConvert.SerializeObject(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }),
-                v => JsonConvert.DeserializeObject<IDictionary<string, object>>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }))
+                v => JsonConvert.DeserializeObject<IDictionary<string, string>>(v, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }))
             .HasColumnType("nvarchar(max)");
 
         // Configure other properties

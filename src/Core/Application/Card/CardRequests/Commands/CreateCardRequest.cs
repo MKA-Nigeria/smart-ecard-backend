@@ -1,10 +1,9 @@
-﻿using Application.Gateway;
+﻿using Application.Card.CardRequests.Queries.Dto;
+using Application.Common.Exceptions;
+using Application.Gateway;
 using Domain.Entities;
 using Domain.Enums;
 using Mapster;
-using Newtonsoft.Json;
-using System.Collections;
-
 namespace Application.Card.CardRequests.Commands;
 
 public class BiometricDataRequest
@@ -15,6 +14,7 @@ public class BiometricDataRequest
 public class CreateCardRequest : IRequest<DefaultIdType>
 {
     public string ExternalId { get; set; } = default!;
+    public MemberData MemberData { get; set; }
     public BiometricDataRequest? Biometrics { get; set; }
 
 }
@@ -35,52 +35,16 @@ public class CreateCardRequestHandler(IRepository<CardRequest> repository, IGate
     private readonly IGatewayHandler _gateway = gateway;
     public async Task<DefaultIdType> Handle(CreateCardRequest request, CancellationToken cancellationToken)
     {
-        var data = await _gateway.GetEntityAsync(request.ExternalId);
+        var existingCardRequest = await _repository.FirstOrDefaultAsync(x => x.ExternalId == request.ExternalId && (x.Status != CardRequestStatus.Rejected || x.Status != CardRequestStatus.Cancelled), cancellationToken);
 
-        var dataModel = await _configRepo.FirstOrDefaultAsync(x => x.Key == "UserData");
-
-        if (dataModel == null || dataModel.Value == null)
+        if(existingCardRequest != null)
         {
-            throw new Exception("User Data not provided");
+            throw new ForbiddenException("The member has an existing card");
         }
 
-        // Deserialize the JSON string into a dictionary
-        Dictionary<string, object> userData = JsonConvert.DeserializeObject<Dictionary<string, object>>(dataModel.Value);
+        var cardRequestData = request.MemberData.Adapt<CardRequestData>();
 
-        var gender = (data[userData["Gender"]] == "M") ? Gender.Male : Gender.Female;
-        DateTime date = data[userData["DateOfBirth"]];
-        var cardRequestData = new CardRequestData
-        {
-            FirstName = data[userData["FirstName"]],
-            LastName = data[userData["LastName"]],
-            DateOfBirth = date,
-            Gender = gender,
-            Address = data[userData["Address"]],
-            Email = data[userData["Email"]],
-            PhoneNumber = data[userData["PhoneNumber"]]
-        };
-        /*var cardRequestData = new CardRequestData(data[userData["FirstName"]], data[userData["LastName"]], date, data[userData["Address"]], data[userData["Email"]], data[userData["PhoneNumber"]], "ambaaq.png", gender, null, null);
-*/
-        var appDomain = await _configRepo.FirstOrDefaultAsync(x => x.Key == "AppDomain");
-        var userDataValue = await _configRepo.FirstOrDefaultAsync(x => x.Key == "UseSubDomain");
-        if (userDataValue == null)
-        {
-            throw new Exception("App Domain User not set");
-        }
-
-        var userDataSett = JsonConvert.DeserializeObject<Dictionary<string, object>>(userDataValue.Value);
-        if ((bool)userDataSett["CheckAdditionalData"])
-        {
-            var checkKey = data[(string)userDataSett["CheckDataKey"]];
-            var urls = userDataSett["AdditionalUrl"] as ArrayList;
-           // var url = urls.ToArray().FirstOrDefault(x => x[checkKey] );
-            var additionalData = await _gateway.GetEntityAsync(request.ExternalId);
-
-        }
-
-        userData.Add("Genotype", "Gen");
-
-        var cardRequest = new CardRequest(request.ExternalId, request.Biometrics.Adapt<BiometricData>(), cardRequestData, userData);
+        var cardRequest = new CardRequest(request.ExternalId, request.Biometrics.Adapt<BiometricData>(), cardRequestData, request.MemberData.CustomData);
 
         await _repository.AddAsync(cardRequest, cancellationToken);
         await _repository.SaveChangesAsync();

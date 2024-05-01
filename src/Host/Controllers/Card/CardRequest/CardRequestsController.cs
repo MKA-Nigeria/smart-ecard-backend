@@ -19,6 +19,15 @@ public class CardRequestsController : VersionNeutralApiController
         return Mediator.Send(cardRequest);
     }
 
+    [HttpPost("search2")]
+    [MustHavePermission(AppAction.Search, Resource.CardRequest)]
+    [OpenApiOperation("Search card or get all card requests", "")]
+    public async Task<IActionResult> SearchAsync2(SearchCardRequest cardRequest)
+    {
+        return Ok(Mediator.Send(cardRequest));
+    }
+
+
     [HttpGet("{id:guid}")]
     [MustHavePermission(AppAction.Search, Resource.CardRequest)]
     [OpenApiOperation("Get card requests", "")]

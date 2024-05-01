@@ -15,11 +15,11 @@ public class SearchCardRequestHandler(IRepository<CardRequest> repository) : IRe
     {
         var cardRequests = await repository.ListAsync(cancellationToken);
         
-        cardRequests = (request.Keyword == null) ? cardRequests : [.. cardRequests.SearchByKeyword(request.Keyword)];
+        cardRequests = string.IsNullOrEmpty(request.Keyword) ? cardRequests : [.. cardRequests.SearchByKeyword(request.Keyword)];
 
         if(request.Key is not null && request.Value is not null)
         {
-            cardRequests = cardRequests.Where(cardRequest => cardRequest.CustomData.Any(kv => kv.Key.Contains(request.Key, StringComparison.CurrentCultureIgnoreCase) && kv.Value.Contains(request.Value, StringComparison.CurrentCultureIgnoreCase))).ToList();
+            cardRequests = cardRequests.Where(cardRequest => cardRequest.CustomData.Any(kv => kv.Key.Contains(request.Key, comparisonType: StringComparison.CurrentCultureIgnoreCase) && kv.Value.Contains(request.Value, StringComparison.CurrentCultureIgnoreCase))).ToList();
         }
 
         List<CardRequestDto> cardRequestsDto = cardRequests.ConvertAll(cardRequest =>
@@ -33,6 +33,7 @@ public class SearchCardRequestHandler(IRepository<CardRequest> repository) : IRe
             };
 
             cardRequestDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
+            cardRequestDto.MemberData.EntityId = cardRequest.ExternalId;
 
             return cardRequestDto;
         });

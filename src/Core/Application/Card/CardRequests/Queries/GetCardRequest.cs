@@ -35,6 +35,7 @@ public class GetCardRequestHandler(IRepository<CardRequest> repository) : IReque
             Status = cardRequest.Status
         };
         cardRequestDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
+        cardRequestDto.MemberData.EntityId = cardRequest.ExternalId;
         return cardRequestDto;
     }
 }

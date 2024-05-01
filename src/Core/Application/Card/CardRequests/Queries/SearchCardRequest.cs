@@ -39,4 +39,3 @@ public class SearchCardRequestHandler(IRepository<CardRequest> repository) : IRe
         return new PaginationResponse<CardRequestDto>(cardRequestsDto, cardRequestsDto.Count, request.PageNumber, request.PageSize);
     }
 }
-

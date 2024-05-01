@@ -7,6 +7,7 @@ using Infrastructure.Common;
 using Infrastructure.Logging.Serilog;
 using Microsoft.AspNetCore.Mvc;
 using Host.Configurations;
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 
 [assembly: ApiConventionType(typeof(ApiConventions))]
 
@@ -20,13 +21,24 @@ try
     builder.Services.AddControllers();
     builder.Services.AddInfrastructure(builder.Configuration);
     builder.Services.AddApplication();
-
+    builder.Services.AddCors(options =>
+    {
+        options.AddPolicy(
+            "CorsPolicy",
+            builder =>
+            {
+                builder.AllowAnyOrigin()
+                       .AllowAnyMethod()
+                       .AllowAnyHeader();
+            });
+    });
     var app = builder.Build();
 
     await app.Services.InitializeDatabasesAsync();
 
     app.UseInfrastructure(builder.Configuration);
     app.MapEndpoints();
+    app.UseCors("CorsPolicy");
     app.Run();
 }
 catch (Exception ex) when (!ex.GetType().Name.Equals("StopTheHostException", StringComparison.Ordinal))

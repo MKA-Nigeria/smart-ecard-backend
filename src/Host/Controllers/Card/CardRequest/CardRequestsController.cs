@@ -13,7 +13,7 @@ public class CardRequestsController : VersionNeutralApiController
 {
     [HttpPost("search")]
     [MustHavePermission(AppAction.Search, Resource.CardRequest)]
-    [OpenApiOperation("Search card or get all card requests")]
+    [OpenApiOperation("Search card or get all card requests", "")]
     public Task<PaginationResponse<CardRequestDto>> SearchAsync(SearchCardRequest cardRequest)
     {
         return Mediator.Send(cardRequest);
@@ -21,7 +21,7 @@ public class CardRequestsController : VersionNeutralApiController
 
     [HttpGet("{id:guid}")]
     [MustHavePermission(AppAction.Search, Resource.CardRequest)]
-    [OpenApiOperation("Get card requests")]
+    [OpenApiOperation("Get card requests", "")]
     public Task<CardRequestDto> GetAsync(DefaultIdType id)
     {
         return Mediator.Send(new GetCardRequest { CardRequestId = id });
@@ -29,7 +29,7 @@ public class CardRequestsController : VersionNeutralApiController
     
     [HttpGet("member/{id}")]
     //[MustHavePermission(AppAction.Search, Resource.CardRequest)]
-    [OpenApiOperation("Get member information")]
+    [OpenApiOperation("Get member information", "")]
     public Task<MemberData> GetMemberDataAsync(string id)
     {
         return Mediator.Send(new GetMemberRequest { EntityId = id });
@@ -37,7 +37,7 @@ public class CardRequestsController : VersionNeutralApiController
 
     [HttpPost]
     [MustHavePermission(AppAction.Create, Resource.CardRequest)]
-    [OpenApiOperation("Request for new card with unique Id")]
+    [OpenApiOperation("Request for new card with unique Id", "")]
     public Task<Guid> CreateAsync(CreateCardRequest cardRequest)
     {
         return Mediator.Send(cardRequest);
@@ -45,7 +45,7 @@ public class CardRequestsController : VersionNeutralApiController
 
     [HttpPut("approve/{id:guid}")]
     [MustHavePermission(AppAction.Update, Resource.CardRequest)]
-    [OpenApiOperation("Approve card request")]
+    [OpenApiOperation("Approve card request", "")]
     public Task<Guid> ApproveAsync(DefaultIdType id)
     {
         return Mediator.Send(new ApproveCardRequest { CardRequestId = id });
@@ -53,7 +53,7 @@ public class CardRequestsController : VersionNeutralApiController
 
     [HttpPut("reject/{id:guid}")]
     [MustHavePermission(AppAction.Update, Resource.CardRequest)]
-    [OpenApiOperation("Reject card request")]
+    [OpenApiOperation("Reject card request", "")]
     public Task<Guid> RejectAsync(DefaultIdType id)
     {
         return Mediator.Send(new RejectCardRequest { CardRequestId = id });
@@ -61,7 +61,7 @@ public class CardRequestsController : VersionNeutralApiController
 
     [HttpPut("cancel/{id:guid}")]
     [MustHavePermission(AppAction.Update, Resource.CardRequest)]
-    [OpenApiOperation("Cancel card request")]
+    [OpenApiOperation("Cancel card request", "")]
     public Task<Guid> CancelAsync(DefaultIdType id)
     {
         return Mediator.Send(new CancelCardRequest { CardRequestId = id });

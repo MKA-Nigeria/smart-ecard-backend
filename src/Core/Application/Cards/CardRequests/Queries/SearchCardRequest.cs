@@ -1,8 +1,8 @@
-﻿using Application.Card.CardRequests.Queries.Dto;
+﻿using Application.Cards.CardRequests.Queries.Dto;
 using Application.Common.Models;
 using Mapster;
 
-namespace Application.Card.CardRequests.Queries;
+namespace Application.Cards.CardRequests.Queries;
 public class SearchCardRequest : PaginationFilter, IRequest<PaginationResponse<CardRequestDto>>
 {
     public string? Key { get; set; }

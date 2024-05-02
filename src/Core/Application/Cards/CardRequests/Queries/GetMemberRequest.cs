@@ -1,29 +1,34 @@
-﻿using Application.Card.CardRequests.Commands;
-using Application.Card.CardRequests.Queries.Dto;
+﻿using Application.Cards.CardRequests.Queries.Dto;
+using Application.Common.Dtos;
 using Application.Common.Exceptions;
-using Application.Common.Models;
 using Application.Gateway;
 using Domain.Entities;
 using Domain.Enums;
-using Mapster;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System.Collections;
-using System.Net;
-using System.Text.Json.Nodes;
 
-namespace Application.Card.CardRequests.Queries;
-public class GetMemberRequest : IRequest<MemberData>
+namespace Application.Cards.CardRequests.Queries;
+public class GetMemberRequest : IRequest<BaseResponse<MemberData>>
 {
     public string EntityId { get; set; } = default!;
 }
-public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppConfiguration> configRepo) : IRequestHandler<GetMemberRequest, MemberData>
+public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppConfiguration> configRepo, IRepository<CardRequest> cardRequestRepo) : IRequestHandler<GetMemberRequest, BaseResponse<MemberData>>
 {
 
     private readonly IRepository<AppConfiguration> _configRepo = configRepo;
+    private readonly IRepository<CardRequest> _cardRequestRepo = cardRequestRepo;
     private readonly IGatewayHandler _gateway = gateway;
-    public async Task<MemberData> Handle(GetMemberRequest request, CancellationToken cancellationToken)
+    public async Task<BaseResponse<MemberData>> Handle(GetMemberRequest request, CancellationToken cancellationToken)
     {
+        var cardRequest = await _cardRequestRepo.FirstOrDefaultAsync(x => x.ExternalId.Equals(request.EntityId) && (x.Status != CardRequestStatus.Rejected || x.Status != CardRequestStatus.Cancelled));
+        if (cardRequest is not null)
+        {
+            return new BaseResponse<MemberData>
+            {
+                Message = "Card request already exist for this member",
+                Status = false
+            };
+        }
+
         var data = await _gateway.GetEntityAsync(request.EntityId);
         _ = data ?? throw new NotFoundException("Member not found");
 
@@ -31,7 +36,11 @@ public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppCon
 
         if (dataModel == null || dataModel.Value == null)
         {
-            throw new Exception("User Data not provided");
+            return new BaseResponse<MemberData>
+            {
+                Message = "User Data not provided",
+                Status = false
+            };
         }
 
         // Deserialize the JSON string into a dictionary
@@ -76,7 +85,7 @@ public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppCon
             var existingData = new List<string>() { "FirstName", "LastName", "PhoneNumber", "Gender", "Address", "DateOfBirth", "Email" };
             foreach (var item in addData)
             {
-                if(!memberData.CustomData.ContainsKey(item.Key) && !existingData.Contains(item.Key))
+                if (!memberData.CustomData.ContainsKey(item.Key) && !existingData.Contains(item.Key))
                 {
                     memberData.CustomData.Add(item.Key, (string)additionalData[item.Value]);
                 }
@@ -84,7 +93,12 @@ public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppCon
 
         }
 
-        return memberData;
+        return new BaseResponse<MemberData>
+        {
+            Message = "Member data retrieved",
+            Status = true,
+            Data = memberData
+        };
     }
 }
 

@@ -1,10 +1,10 @@
-﻿using Application.Card.CardRequests.Queries.Dto;
+﻿using Application.Cards.CardRequests.Queries.Dto;
 using Application.Common.Exceptions;
 using Application.Gateway;
 using Domain.Entities;
 using Domain.Enums;
 using Mapster;
-namespace Application.Card.CardRequests.Commands;
+namespace Application.Cards.CardRequests.Commands;
 
 public class BiometricDataRequest
 {

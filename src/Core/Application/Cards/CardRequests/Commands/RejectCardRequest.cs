@@ -1,7 +1,7 @@
 ﻿using Application.Common.Exceptions;
 using Domain.Enums;
 
-namespace Application.Card.CardRequests.Commands;
+namespace Application.Cards.CardRequests.Commands;
 public class RejectCardRequest : IRequest<DefaultIdType>
 {
     public DefaultIdType CardRequestId { get; set; } = default!;

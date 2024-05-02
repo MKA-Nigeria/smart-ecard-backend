@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Card.CardRequests.Queries.Dto;
+namespace Application.Cards.CardRequests.Queries.Dto;
 public class CardRequestDto
 {
     public Guid Id { get; set; }

@@ -11,6 +11,7 @@ public class CardRequest : AuditableEntity, IAggregateRoot
     public CardRequestStatus Status { get; private set; }
     public string? ReasonForRejection { get; private set; }
     public CardRequestData CardData { get; private set; }
+    public  Card Card { get; private set; }
     // other custom data
     public virtual IDictionary<string, string> CustomData { get; private set; }
 

@@ -34,6 +34,7 @@ public abstract class BaseDbContext : IdentityDbContext<ApplicationUser, Applica
 
     public DbSet<Trail> AuditTrails => Set<Trail>();
     public DbSet<CardRequest> CardRequests => Set<CardRequest>();
+    public DbSet<Card> Cards => Set<Card>();
     public DbSet<AppSetting> AppSettings => Set<AppSetting>();
     public DbSet<AppConfiguration> AppConfigurations => Set<AppConfiguration>();
 

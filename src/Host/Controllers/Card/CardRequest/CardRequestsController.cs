@@ -1,7 +1,8 @@
-﻿using Application.Card.CardRequests;
-using Application.Card.CardRequests.Commands;
-using Application.Card.CardRequests.Queries;
-using Application.Card.CardRequests.Queries.Dto;
+﻿using Application.Cards.CardRequests;
+using Application.Cards.CardRequests.Commands;
+using Application.Cards.CardRequests.Queries;
+using Application.Cards.CardRequests.Queries.Dto;
+using Application.Common.Dtos;
 using Application.Common.Models;
 using Infrastructure.Auth.Permissions;
 using Microsoft.AspNetCore.Mvc;
@@ -39,7 +40,7 @@ public class CardRequestsController : VersionNeutralApiController
     [HttpGet("member/{id}")]
     //[MustHavePermission(AppAction.Search, Resource.CardRequest)]
     [OpenApiOperation("Get member information", "")]
-    public Task<MemberData> GetMemberDataAsync(string id)
+    public Task<BaseResponse<MemberData>> GetMemberDataAsync(string id)
     {
         return Mediator.Send(new GetMemberRequest { EntityId = id });
     }

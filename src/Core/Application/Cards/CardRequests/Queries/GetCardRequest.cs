@@ -1,15 +1,7 @@
-﻿using Application.Card.CardRequests.Commands;
-using Application.Card.CardRequests.Queries.Dto;
-using Application.Common.Interfaces;
-using Application.Common.Models;
+﻿using Application.Cards.CardRequests.Queries.Dto;
 using Mapster;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Application.Card.CardRequests.Queries;
+namespace Application.Cards.CardRequests.Queries;
 public class GetCardRequest : IRequest<CardRequestDto>
 {
     public DefaultIdType CardRequestId { get; set; } = default!;

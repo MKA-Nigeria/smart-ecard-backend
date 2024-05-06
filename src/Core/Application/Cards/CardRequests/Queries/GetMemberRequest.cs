@@ -30,7 +30,14 @@ public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppCon
         }
 
         var data = await _gateway.GetEntityAsync(request.EntityId);
-        _ = data ?? throw new NotFoundException("Member not found");
+        if(data == null)
+        {
+            return new BaseResponse<MemberData>
+            {
+                Message = "Member with the identity number not found",
+                Status = false
+            };
+        }
 
         var dataModel = await _configRepo.FirstOrDefaultAsync(x => x.Key == "UserData");
 

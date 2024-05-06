@@ -80,13 +80,22 @@ public class GatewayHandler : IGatewayHandler
             Method = HttpMethod.Get
         };
         request.Headers.Add("ApiKey", _config.GetSection("ApiKey").Value);
-        string jsonResponse = await _client.GetStringAsync(url);
-        dynamic data = JsonConvert.DeserializeObject<dynamic>(jsonResponse, new JsonSerializerSettings
+        try
         {
-            TypeNameHandling = TypeNameHandling.Auto,
-            Converters = { new ExpandoObjectConverter() }
-        });
-        return data;
+            string jsonResponse = await _client.GetStringAsync(url);
+            dynamic data = JsonConvert.DeserializeObject<dynamic>(jsonResponse, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                Converters = { new ExpandoObjectConverter() }
+            });
+            return data;
+        }
+        catch (Exception ex)
+        {
+
+            throw ex;
+        }
+        
     }
 
     public async Task<dynamic> GetEntityAsync(string url, string entityId)

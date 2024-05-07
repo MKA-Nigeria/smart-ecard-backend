@@ -4,20 +4,20 @@ using Domain.Enums;
 
 namespace Application.Cards.Cards.Queries;
 
-public class SearchActiveCardsRequest : PaginationFilter, IRequest<PaginationResponse<CardDto>>
+public class SearchInActiveCardsRequest : PaginationFilter, IRequest<PaginationResponse<CardDto>>
 {
 
 }
 
-public class SearchActiveCardstHandler(IRepository<Card> repository, IRepository<CardRequest> cardRequestRepository) : IRequestHandler<SearchActiveCardsRequest, PaginationResponse<CardDto>>
+public class SearchInActiveCardsRequestHandler(IRepository<Card> repository, IRepository<CardRequest> cardRequestRepository) : IRequestHandler<SearchInActiveCardsRequest, PaginationResponse<CardDto>>
 {
-    public async Task<PaginationResponse<CardDto>> Handle(SearchActiveCardsRequest request, CancellationToken cancellationToken)
+    public async Task<PaginationResponse<CardDto>> Handle(SearchInActiveCardsRequest request, CancellationToken cancellationToken)
     {
-        var activeCards = await repository.ListAsync(x => x.Status == CardStatus.Active, cancellationToken);
-        List<CardDto> cardsDto = new();
+        var activeCards = await repository.ListAsync(x => x.Status == CardStatus.InActive, cancellationToken);
+        List<CardDto> cardsDto = [];
         foreach (var item in activeCards)
         {
-            var cardRequest = await cardRequestRepository.FirstOrDefaultAsync(x => x.Id == item.CardRequestId);
+            var cardRequest = await cardRequestRepository.FirstOrDefaultAsync(x => x.Id == item.CardRequestId, cancellationToken);
             var cardDto = new CardDto
             {
                 Id = item.Id,

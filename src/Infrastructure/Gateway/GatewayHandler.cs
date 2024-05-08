@@ -1,20 +1,13 @@
 ﻿using Application.Gateway;
-using DocumentFormat.OpenXml.Spreadsheet;
-using Infrastructure.Gateway.Extensions;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json;
-using System.Net;
-using System.Net.Http;
 using System.Text;
-using System.Text.Json;
-using JsonSerializer = System.Text.Json.JsonSerializer;
-using System.Dynamic;
 using Application.Identity.Tokens;
-using Infrastructure.Persistence.Initialization;
 using Microsoft.Extensions.Logging;
 using Application.Common.Persistence;
 using Domain.Entities;
+using Shared.Configurations;
 
 namespace Infrastructure.Gateway;
 public class GatewayHandler : IGatewayHandler
@@ -66,11 +59,11 @@ public class GatewayHandler : IGatewayHandler
 
     public async Task<dynamic> GetEntityAsync(string entityId)
     {
-        var externalEntityUrl = await _configRepository.GetByExpressionAsync(x => x.Key == "ExternalEntityUrl");
+        var externalEntityUrl = await _configRepository.GetByExpressionAsync(x => x.Key == ConfigurationKeys.ExternalEntityUrl);
         if (externalEntityUrl is null || externalEntityUrl.Value is null)
         {
-            _logger.LogInformation($"externalEntityUrl not found");
-            throw new Exception($"externalEntityUrl not found");
+            _logger.LogInformation("externalEntityUrl not configured");
+            throw new InvalidOperationException("externalEntityUrl not found");
         }
 
         var url = $"{externalEntityUrl.Value}{entityId}";
@@ -80,9 +73,23 @@ public class GatewayHandler : IGatewayHandler
             Method = HttpMethod.Get
         };
         request.Headers.Add("ApiKey", _config.GetSection("ApiKey").Value);
+
         try
         {
-            string jsonResponse = await _client.GetStringAsync(url);
+            var response = await _client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            // Reading the response as string
+            string jsonResponse = await response.Content.ReadAsStringAsync();
+
+            // Optionally, check if the jsonResponse is not null or empty
+            if (string.IsNullOrEmpty(jsonResponse))
+            {
+                _logger.LogWarning("Received empty response for entityId: {entityId}", entityId);
+                return null; // or throw an appropriate exception
+            }
+
+            // Deserialize the JSON response
             dynamic data = JsonConvert.DeserializeObject<dynamic>(jsonResponse, new JsonSerializerSettings
             {
                 TypeNameHandling = TypeNameHandling.Auto,
@@ -90,13 +97,18 @@ public class GatewayHandler : IGatewayHandler
             });
             return data;
         }
+        catch (HttpRequestException hre)
+        {
+            _logger.LogError("HTTP Request failed: {Message}", hre.Message);
+            throw new Exception($"HTTP Request failed: {hre.Message}");
+        }
         catch (Exception ex)
         {
-
-            throw ex;
+            _logger.LogError("An error occurred: {Message}", ex.Message);
+            throw; // Rethrow the current exception without losing stack trace
         }
-        
     }
+
 
     public async Task<dynamic> GetEntityAsync(string url, string entityId)
     {
@@ -107,12 +119,38 @@ public class GatewayHandler : IGatewayHandler
             Method = HttpMethod.Get
         };
         request.Headers.Add("ApiKey", _config.GetSection("ApiKey").Value);
-        string jsonResponse = await _client.GetStringAsync(url);
-        dynamic data = JsonConvert.DeserializeObject<dynamic>(jsonResponse, new JsonSerializerSettings
+        try
         {
-            TypeNameHandling = TypeNameHandling.Auto,
-            Converters = { new ExpandoObjectConverter() }
-        });
-        return data;
+            var response = await _client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            // Reading the response as string
+            string jsonResponse = await response.Content.ReadAsStringAsync();
+
+            // Optionally, check if the jsonResponse is not null or empty
+            if (string.IsNullOrEmpty(jsonResponse))
+            {
+                _logger.LogWarning("Received empty response for entityId: {entityId}", entityId);
+                return null; // or throw an appropriate exception
+            }
+
+            // Deserialize the JSON response
+            dynamic data = JsonConvert.DeserializeObject<dynamic>(jsonResponse, new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                Converters = { new ExpandoObjectConverter() }
+            });
+            return data;
+        }
+        catch (HttpRequestException hre)
+        {
+            _logger.LogError("HTTP Request failed: {Message}", hre.Message);
+            throw new Exception($"HTTP Request failed: {hre.Message}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("An error occurred: {Message}", ex.Message);
+            throw; // Rethrow the current exception without losing stack trace
+        }
     }
 }

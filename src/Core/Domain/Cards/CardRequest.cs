@@ -30,12 +30,13 @@ public class CardRequest : AuditableEntity, IAggregateRoot
         CustomData = customData;
     }
 
-    public void Approve()
+    public void Approve(Guid userId)
     {
         if (Status != CardRequestStatus.Pending)
             throw new CardRequestException("Request is not in a pending state.");
 
         Status = CardRequestStatus.Approved;
+        LastModifiedBy = userId;
     }
 
     public void Reject(string reason)

@@ -1,6 +1,7 @@
 ﻿using Application.Cards.CardRequests.Queries.Dto;
 using Application.Common.Dtos;
 using Application.Common.Exceptions;
+using Application.Common.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
 using Newtonsoft.Json;
@@ -22,26 +23,24 @@ public class ApproveCardRequestValidator : CustomValidator<ApproveCardRequest>
 
 }
 
-public class ApproveCardRequestHandler(IRepository<CardRequest> repository, ApproveCardRequestValidator validator, IRepository<AppConfiguration> configRepo, IRepository<Card> cardRepository) : IRequestHandler<ApproveCardRequest, DefaultIdType>
+public class ApproveCardRequestHandler(IRepository<CardRequest> _repository, ApproveCardRequestValidator validator, IRepository<AppConfiguration> _configRepo, IRepository<Card> _cardRepository, ICurrentUser _currentUser) : IRequestHandler<ApproveCardRequest, DefaultIdType>
 {
-    private readonly IRepository<AppConfiguration> _configRepo = configRepo;
-    private readonly IRepository<CardRequest> _repository = repository;
-    private readonly IRepository<Card> _cardRepository = cardRepository;
     public async Task<DefaultIdType> Handle(ApproveCardRequest request, CancellationToken cancellationToken)
     {
         var cardRequest = await _repository.FirstOrDefaultAsync(x => x.Id == request.CardRequestId, cancellationToken);
         _ = cardRequest ?? throw new NotFoundException($"Card request with Id {request.CardRequestId} not found");
-        cardRequest.Approve();
+        var userId = _currentUser.GetUserId();
+        cardRequest.Approve(userId);
 
         await _repository.UpdateAsync(cardRequest, cancellationToken);
 
-        await CreateCard(cardRequest);
+        await CreateCard(cardRequest, userId);
 
         await _repository.SaveChangesAsync(cancellationToken);
         return cardRequest.Id;
     }
 
-    public async Task CreateCard(CardRequest cardRequest)
+    public async Task CreateCard(CardRequest cardRequest, Guid createdBy)
     {
         var dataModel = await _configRepo.FirstOrDefaultAsync(x => x.Key == "CardData");
 
@@ -57,7 +56,7 @@ public class ApproveCardRequestHandler(IRepository<CardRequest> repository, Appr
         int length = int.Parse(lengthAsString);
         string uniqueKey = Guid.NewGuid().ToString().Substring(0, length);
         string cardNumber = $"{orgName}{cardRequest.ExternalId}{uniqueKey}";
-        var card = new Card(cardNumber, cardRequest.Id, cardRequest);
+        var card = new Card(cardNumber, cardRequest.Id, cardRequest, createdBy);
         await _cardRepository.AddAsync(card);
     }
 }

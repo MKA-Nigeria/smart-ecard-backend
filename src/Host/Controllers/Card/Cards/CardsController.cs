@@ -12,36 +12,36 @@ using Application.Cards.Cards.Commands;
 namespace Host.Controllers.Card.Cards;
 public class CardsController : VersionNeutralApiController
 {
-    [HttpPost("/active/search")]
+    [HttpPost("/search")]
     [MustHavePermission(AppAction.Search, Resource.Card)]
     [OpenApiOperation("Search active cards or get all active cards", "")]
-    public Task<PaginationResponse<CardDto>> SearchActiveAsync(SearchActiveCardsRequest cardRequest)
+    public Task<PaginationResponse<CardDto>> SearchActiveAsync(SearchCardsRequest cardRequest)
     {
         return Mediator.Send(cardRequest);
     }
 
-    [HttpPost("/inactive/search")]
-    [MustHavePermission(AppAction.Search, Resource.Card)]
-    [OpenApiOperation("Search active cards or get all active cards", "")]
-    public Task<PaginationResponse<CardDto>> SearchInActiveAsync(SearchInActiveCardsRequest cardRequest)
+    [HttpPut("activate/{cardNumber}")]
+    [MustHavePermission(AppAction.Update, Resource.Card)]
+    [OpenApiOperation("Activate card", "")]
+    public Task<Guid> Activate(string cardNumber)
     {
-        return Mediator.Send(cardRequest);
+        return Mediator.Send(new ActivateCardRequest { CardNumber = cardNumber });
     }
 
-    [HttpPut("activate/{id:guid}")]
+    [HttpPut("deactivate/{cardNumber}")]
     [MustHavePermission(AppAction.Update, Resource.Card)]
-    [OpenApiOperation("Approve card request", "")]
-    public Task<Guid> Activate(DefaultIdType id)
+    [OpenApiOperation("Deactivae card", "")]
+    public Task<Guid> Deactivate(string cardNumber)
     {
-        return Mediator.Send(new ActivateCardRequest { CardId = id });
+        return Mediator.Send(new DeactivateCardRequest { CardNumber = cardNumber });
     }
 
-    [HttpPut("deactivate/{id:guid}")]
-    [MustHavePermission(AppAction.Update, Resource.Card)]
-    [OpenApiOperation("Approve card request", "")]
-    public Task<Guid> Deactivate(DefaultIdType id)
+    [HttpGet("{cardNumber}")]
+    [MustHavePermission(AppAction.Search, Resource.CardRequest)]
+    [OpenApiOperation("Get card requests", "")]
+    public Task<CardDto> GetAsync(string cardNumber)
     {
-        return Mediator.Send(new DeactivateCardRequest { CardId = id });
+        return Mediator.Send(new GetCardRequest { CardNumber = cardNumber });
     }
 
 }

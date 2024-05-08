@@ -15,11 +15,12 @@ public class Card : AuditableEntity, IAggregateRoot
     public CardStatus Status { get; private set; }
     public PrintStatus PrintStatus { get; private set; }
     public bool IsCollected { get; set; }
+    public DateTime DateCollected { get; set; }
     private Card()
     {
         
     }
-    public Card(string cardNumber, Guid cardRequestId, CardRequest cardRequest)
+    public Card(string cardNumber, Guid cardRequestId, CardRequest cardRequest, Guid createdBy)
     {
         CardNumber = cardNumber;
         CardRequestId = cardRequestId;
@@ -27,6 +28,7 @@ public class Card : AuditableEntity, IAggregateRoot
         Status = CardStatus.Active;
         PrintStatus = PrintStatus.ReadyForPrint;
         IsCollected = false;
+        CreatedBy = createdBy;
     }
 
     public void ChangeCardStatus(CardStatus status)
@@ -39,9 +41,15 @@ public class Card : AuditableEntity, IAggregateRoot
         PrintStatus = status;
     }
 
-    public void SetISCollected(bool isCollected)
+    public void Collect(bool isCollected)
     {
         IsCollected = isCollected;
+        DateCollected = DateTime.Now;
+    }
+     public void ResetCollect(bool isCollected)
+    {
+        IsCollected = isCollected;
+        DateCollected = DateTime.Now;
     }
 
 }

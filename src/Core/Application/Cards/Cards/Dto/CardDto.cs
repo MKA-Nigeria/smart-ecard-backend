@@ -8,10 +8,15 @@ using System.Threading.Tasks;
 namespace Application.Cards.Cards.Dto;
 public class CardDto
 {
-    public Guid Id { get; set; }
+    //public Guid Id { get; set; }
+    public string ExternalId { get; set; }
     public string CardNumber { get; set; }
     public PrintStatus PrintStatus { get; set; }
+    public CardStatus CardStatus { get; set; }
     public bool IsCollected { get; set; }
-    public string Name { get; set; }
+    public DateTime DateCollected { get; set; }
+    public string FullName { get; set; }
+    public DateTime RequestDate { get; set; }
     public DateTime ApprovedDate { get; set; }
+    public string? ApprovedBy { get; set; }
 }

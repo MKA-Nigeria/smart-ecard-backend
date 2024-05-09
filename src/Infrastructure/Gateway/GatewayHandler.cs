@@ -77,25 +77,29 @@ public class GatewayHandler : IGatewayHandler
         try
         {
             var response = await _client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
-            // Reading the response as string
-            string jsonResponse = await response.Content.ReadAsStringAsync();
-
-            // Optionally, check if the jsonResponse is not null or empty
-            if (string.IsNullOrEmpty(jsonResponse))
+            _logger.LogInformation("Get Entity Data response: {response}", response.Content);
+            //response.EnsureSuccessStatusCode();
+            if (response.IsSuccessStatusCode)
             {
-                _logger.LogWarning("Received empty response for entityId: {entityId}", entityId);
-                return null; // or throw an appropriate exception
+                // Reading the response as string
+                string jsonResponse = await response.Content.ReadAsStringAsync();
+
+                // Optionally, check if the jsonResponse is not null or empty
+                if (string.IsNullOrEmpty(jsonResponse))
+                {
+                    _logger.LogWarning("Received empty response for entityId: {entityId}", entityId);
+                    return null; // or throw an appropriate exception
+                }
+
+                // Deserialize the JSON response
+                dynamic data = JsonConvert.DeserializeObject<dynamic>(jsonResponse, new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    Converters = { new ExpandoObjectConverter() }
+                });
+                return data;
             }
-
-            // Deserialize the JSON response
-            dynamic data = JsonConvert.DeserializeObject<dynamic>(jsonResponse, new JsonSerializerSettings
-            {
-                TypeNameHandling = TypeNameHandling.Auto,
-                Converters = { new ExpandoObjectConverter() }
-            });
-            return data;
+            return null;
         }
         catch (HttpRequestException hre)
         {

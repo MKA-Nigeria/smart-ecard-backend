@@ -5,6 +5,8 @@ using Application.Gateway;
 using Domain.Entities;
 using Domain.Enums;
 using Newtonsoft.Json;
+using Shared.Configurations;
+using System;
 
 namespace Application.Cards.CardRequests.Queries;
 public class GetMemberRequest : IRequest<BaseResponse<MemberData>>
@@ -39,7 +41,7 @@ public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppCon
             };
         }
 
-        var dataModel = await _configRepo.FirstOrDefaultAsync(x => x.Key == "UserData");
+        var dataModel = await _configRepo.FirstOrDefaultAsync(x => x.Key == ConfigurationKeys.ExternalEntityData);
 
         if (dataModel == null || dataModel.Value == null)
         {
@@ -68,11 +70,15 @@ public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppCon
             MiddleName = (string)data[userData["MiddleName"]],
             EntityId = request.EntityId
         };
-        var appDomain = await _configRepo.FirstOrDefaultAsync(x => x.Key == "AppDomain");
-        var userDataValue = await _configRepo.FirstOrDefaultAsync(x => x.Key == "UseSubDomain");
+
+        var userDataValue = await _configRepo.FirstOrDefaultAsync(x => x.Key == ConfigurationKeys.ExternalEntityAdditionalData);
         if (userDataValue == null)
         {
-            throw new Exception("App Domain User not set");
+            return new BaseResponse<MemberData>
+            {
+                Message = "Additional data information not configured",
+                Status = false
+            };
         }
 
         var userDataSett = JsonConvert.DeserializeObject<Dictionary<string, object>>(userDataValue.Value);
@@ -80,9 +86,29 @@ public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppCon
         {
             var checkKey = data[(string)userDataSett["CheckDataKey"]];
             var urlObject = userDataSett["AdditionalUrl"];
-            var loginData = JsonConvert.SerializeObject(urlObject);
-            var bbb = JsonConvert.DeserializeObject<Dictionary<string, string>>(loginData);
-            var url = bbb[(string)checkKey];
+            var objectData = JsonConvert.SerializeObject(urlObject);
+            var dataResponse = JsonConvert.DeserializeObject<Dictionary<string, string>>(objectData);
+            //var url = dataResponse[(string)checkKey];
+            if (!dataResponse.TryGetValue((string)checkKey, out string urlObj) || urlObj == null)
+            {
+                return new BaseResponse<MemberData>
+                {
+                    Message = $"URL data is missing or null for key {checkKey}",
+                    Status = false
+                };
+            }
+
+            string url = urlObj;
+
+            // Check if the URL is in a valid format
+            if (!Uri.IsWellFormedUriString(url, UriKind.Absolute))
+            {
+                return new BaseResponse<MemberData>
+                {
+                    Message = $"The URL retrieved for key {checkKey} is not valid: {url}",
+                    Status = false
+                };
+            }
             var additionalData = await _gateway.GetEntityAsync(url, request.EntityId);
             var additinalDataModel = userDataSett[(string)checkKey];
 

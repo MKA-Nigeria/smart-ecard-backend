@@ -5,6 +5,7 @@ using Application.Common.Interfaces;
 using Domain.Entities;
 using Domain.Enums;
 using Newtonsoft.Json;
+using Shared.Configurations;
 
 namespace Application.Cards.CardRequests.Commands;
 public class ApproveCardRequest : IRequest<DefaultIdType>
@@ -32,21 +33,21 @@ public class ApproveCardRequestHandler(IRepository<CardRequest> _repository, App
         var userId = _currentUser.GetUserId();
         cardRequest.Approve(userId);
 
-        await _repository.UpdateAsync(cardRequest, cancellationToken);
-
         await CreateCard(cardRequest, userId);
 
+        await _repository.UpdateAsync(cardRequest, cancellationToken);
         await _repository.SaveChangesAsync(cancellationToken);
         return cardRequest.Id;
     }
 
     public async Task CreateCard(CardRequest cardRequest, Guid createdBy)
     {
-        var dataModel = await _configRepo.FirstOrDefaultAsync(x => x.Key == "CardData");
+        var dataModel = await _configRepo.FirstOrDefaultAsync(x => x.Key == ConfigurationKeys.CardData);
 
         if (dataModel == null || dataModel.Value == null)
         {
-            return;
+            // TODO add logger
+            throw new Exception($"No configuration data found for key {ConfigurationKeys.CardData}");
         }
 
         // Deserialize the JSON string into a dictionary

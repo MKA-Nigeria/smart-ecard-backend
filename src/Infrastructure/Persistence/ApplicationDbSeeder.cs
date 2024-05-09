@@ -114,17 +114,29 @@ internal class ApplicationDbSeeder
 
     private async Task SeedConfigurationKeysAsync()
     {
+        var defaultValues = new Dictionary<string, string>
+        {
+            ["AppDomain"] = "DefaultApp",
+            ["ExternalLoginUrl"] = "https://domain/token",
+            ["ExternalLoginData"] = "https://domain/{entityId}",
+            ["ExternalEntityUrl"] = "{\"FirstName\":\"firstName\",\"LastName\":\"surname\",\"MiddleName\":\"middleName\",\"DateOfBirth\":\"dateOfBirth\",\"Address\":\"address\",\"Email\":\"email\",\"PhoneNumber\":\"phoneNo\",\"Gender\":\"sex\"}",
+            ["ExternalEntityData"] = "{\"FirstName\":\"firstName\",\"LastName\":\"surname\",\"DateOfBirth\":\"dateOfBirth\",\"Address\":\"address\",\"Email\":\"email\",\"PhoneNumber\":\"phoneNo\",\"Gender\":\"sex\", \"MiddleName\":\"middleName\"}",
+            ["ExternalEntityAdditionalData"] = "{\"CheckAdditionalData\": true, \"CheckDataKey\": \"auxillaryBodyName\", \"AdditionalUrl\": {\"Lajna\": \"tytytyt\", \"Ansarullah\": \"ghjkhjh\", \"Khuddam\": \"https://tajneedapi.ahmadiyyanigeria.net/members/\"}, \"Khuddam\": {\"JamaatName\":\"jamaatName\",\"circuitName\":\"circuitName\"}}",
+            ["CardData"] = "{\"Organisation\":\"SM\",\"Length\":4}",
+        };
+
         foreach (string key in ConfigurationKeys.DefaultConfigurationKeys)
         {
-            if (await _configRepository.FirstOrDefaultAsync(r => r.Key == key)
-                is not AppConfiguration config)
+            if (await _configRepository.FirstOrDefaultAsync(r => r.Key == key) is not AppConfiguration config)
             {
-                // Create the appConfig
+                // Create the appConfig with default value
+                string defaultValue = defaultValues.ContainsKey(key) ? defaultValues[key] : "change to default";
                 _logger.LogInformation("Seeding {key} AppConfiguration", key);
-                config = new AppConfiguration(key, "change from default");
+                config = new AppConfiguration(key, defaultValue);
                 await _configRepository.AddAsync(config);
                 await _configRepository.SaveChangesAsync();
             }
         }
     }
+
 }

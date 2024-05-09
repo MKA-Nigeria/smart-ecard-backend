@@ -56,7 +56,7 @@ public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppCon
         Dictionary<string, object> userData = JsonConvert.DeserializeObject<Dictionary<string, object>>(dataModel.Value);
 
         var gender = (data[userData["Gender"]] == "M") ? Gender.Male : Gender.Female;
-        DateTime date = data[userData["DateOfBirth"]];
+        DateTime? date = data[userData["DateOfBirth"]];
 
         var memberData = new MemberData
         {

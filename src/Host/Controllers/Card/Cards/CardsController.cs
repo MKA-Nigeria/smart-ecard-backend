@@ -8,6 +8,7 @@ using Application.Cards.Cards.Queries;
 using Application.Cards.Cards.Dto;
 using Application.Cards.CardRequests.Commands;
 using Application.Cards.Cards.Commands;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Host.Controllers.Card.Cards;
 public class CardsController : VersionNeutralApiController
@@ -37,7 +38,7 @@ public class CardsController : VersionNeutralApiController
     }
 
     [HttpGet("{cardNumber}")]
-    [MustHavePermission(AppAction.Search, Resource.CardRequest)]
+    [AllowAnonymous]
     [OpenApiOperation("Get card requests", "")]
     public Task<CardDto> GetAsync(string cardNumber)
     {

@@ -1,11 +1,8 @@
-﻿using Application.Cards.CardRequests.Queries.Dto;
-using Application.Common.Dtos;
+﻿using Newtonsoft.Json;
+using Domain.Entities;
+using Shared.Configurations;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces;
-using Domain.Entities;
-using Domain.Enums;
-using Newtonsoft.Json;
-using Shared.Configurations;
 
 namespace Application.Cards.CardRequests.Commands;
 public class ApproveCardRequest : IRequest<DefaultIdType>
@@ -17,7 +14,6 @@ public class ApproveCardRequestValidator : CustomValidator<ApproveCardRequest>
 {
     public ApproveCardRequestValidator(IRepository<CardRequest> repository)
     {
-
         RuleFor(x => x.CardRequestId).NotEmpty().MustAsync(async (cardRequestId, _) =>
         await repository.FirstOrDefaultAsync(x => x.Id == cardRequestId, _) is CardRequest card).WithMessage("Invalid card request Id");
     }

@@ -1,5 +1,4 @@
-﻿using Application.Cards.CardRequests;
-using Application.Cards.CardRequests.Commands;
+﻿using Application.Cards.CardRequests.Commands;
 using Application.Cards.CardRequests.Queries;
 using Application.Cards.CardRequests.Queries.Dto;
 using Application.Common.Dtos;

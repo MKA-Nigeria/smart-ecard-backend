@@ -17,6 +17,7 @@ public static class AppAction
 public static class Resource
 {
     public const string Users = nameof(Users);
+    public const string AppConfigurations = nameof(AppConfigurations);
     public const string CardRequest = nameof(CardRequest);
     public const string Card = nameof(Card);
     public const string UserRoles = nameof(UserRoles);
@@ -54,6 +55,11 @@ public static class Permissions
         new("Search Card", AppAction.Search, Resource.Card),
         new("Create Card", AppAction.Create, Resource.Card),
         new("Update Card", AppAction.Update, Resource.Card),
+
+        new("View Configurations", AppAction.View, Resource.AppConfigurations),
+        new("Search Configurations", AppAction.Search, Resource.AppConfigurations),
+        new("Create Configurations", AppAction.Create, Resource.AppConfigurations),
+        new("Update Configurations", AppAction.Update, Resource.AppConfigurations),
     ];
 
     public static IReadOnlyList<Permission> All { get; } = new ReadOnlyCollection<Permission>(_all);

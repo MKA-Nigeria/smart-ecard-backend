@@ -1,14 +1,8 @@
-﻿using Application.Cards.CardRequests.Queries.Dto;
-using Application.Cards.CardRequests.Queries;
-using Application.Common.Dtos;
-using Application.Configurations.Commands;
+﻿using Application.Configurations.Commands;
 using Application.Configurations.Dto;
 using Application.Configurations.Queries;
-using Application.Identity.Users;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
-using System.Security.Claims;
 
 namespace Host.Controllers.Configurations;
 public class AppConfigurationsController : VersionNeutralApiController

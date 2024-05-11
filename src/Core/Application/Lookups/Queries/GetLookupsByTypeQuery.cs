@@ -10,7 +10,7 @@ public class GetLookupsByTypeQueryHandler(IRepository<Lookup> repository) : IReq
     private readonly IRepository<Lookup> _repository = repository;
     public async Task<List<LookupDto>> Handle(GetLookupsByTypeQuery request, CancellationToken cancellationToken)
     {
-        var lookups = await _repository.GetByExpressionAsync(l => l.Type == request.Type, cancellationToken);
+        var lookups = await _repository.ListAsync(l => l.Type == request.Type, cancellationToken);
 
         return lookups.Adapt<List<LookupDto>>();
     }

@@ -11,6 +11,7 @@ using Domain.Common.Contracts;
 using Infrastructure.Auditing;
 using Domain.Cards;
 using Domain.Entities;
+using Application.Lookups.Dtos;
 
 namespace Infrastructure.Persistence.Context;
 public abstract class BaseDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string, IdentityUserClaim<string>, IdentityUserRole<string>, IdentityUserLogin<string>, ApplicationRoleClaim, IdentityUserToken<string>>
@@ -37,6 +38,7 @@ public abstract class BaseDbContext : IdentityDbContext<ApplicationUser, Applica
     public DbSet<Card> Cards => Set<Card>();
     public DbSet<AppSetting> AppSettings => Set<AppSetting>();
     public DbSet<AppConfiguration> AppConfigurations => Set<AppConfiguration>();
+    public DbSet<Lookup> Lookups => Set<Lookup>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

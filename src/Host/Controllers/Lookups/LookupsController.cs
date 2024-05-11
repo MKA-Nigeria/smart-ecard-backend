@@ -35,7 +35,7 @@ public class LookupsController : VersionNeutralApiController
         return Mediator.Send(request);
     }
 
-    [HttpPut("update")]
+    [HttpPut("toggle-default-status")]
     // [MustHavePermission(AppAction.Update, Resource.Lookups)]
     [OpenApiOperation("Toggle lookup default status", "")]
     public Task<DefaultIdType> UpdateAppConfigurations(ToggleDefaultStatusCommand request)

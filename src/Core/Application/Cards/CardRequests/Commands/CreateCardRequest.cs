@@ -23,7 +23,6 @@ public class CreateCardRequestValidator : CustomValidator<CreateCardRequest>
     public CreateCardRequestValidator(IReadRepository<CardRequest> repository) => RuleFor(p => p.ExternalId)
             .NotEmpty()
             .MaximumLength(20)
-            .MustAsync(async (externalId, _) => await repository.FirstOrDefaultAsync(c => c.ExternalId == externalId, _) is null)
                 .WithMessage((_, externalId) => $"Card Request aleady exist for {externalId}");
 
 }

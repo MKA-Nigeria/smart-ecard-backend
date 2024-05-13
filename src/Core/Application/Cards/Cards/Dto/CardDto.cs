@@ -19,4 +19,5 @@ public class CardDto
     public DateTime RequestDate { get; set; }
     public DateTime ApprovedDate { get; set; }
     public string? ApprovedBy { get; set; }
+    public IDictionary<string, string> CustomData { get; set; } = new Dictionary<string, string>();
 }

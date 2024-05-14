@@ -34,6 +34,7 @@ public class SearchCardRequestHandler(IRepository<CardRequest> repository) : IRe
 
             cardRequestDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
             cardRequestDto.MemberData.EntityId = cardRequest.ExternalId;
+            cardRequestDto.MemberData.PictureUrl = cardRequest.CardData.PhotoUrl;
 
             return cardRequestDto;
         });

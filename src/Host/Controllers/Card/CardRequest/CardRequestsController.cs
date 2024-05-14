@@ -75,4 +75,13 @@ public class CardRequestsController : VersionNeutralApiController
     {
         return Mediator.Send(new CancelCardRequest { CardRequestId = id });
     }
+
+    //[HttpPost("image")]
+    //[OpenApiOperation("Upload Image for a card request.", "")]
+    //public async Task<IActionResult> UploadImage(FileUploadRequest imageRequest)
+    //{
+    //    string imageName = await _fileStorage.UploadAsync<string>(imageRequest, FileType.Image);
+    //    var stream = await StorageHelper.RetrieveImage(imageName);
+    //    return File(stream, "image/jpeg");
+    //}
 }

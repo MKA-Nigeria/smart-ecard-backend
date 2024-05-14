@@ -18,6 +18,7 @@ using Infrastructure.Common;
 using Infrastructure.Auth;
 using Infrastructure.BackgroundJobs;
 using Infrastructure.Mailing;
+using Infrastructure.FileStorage;
 
 [assembly: InternalsVisibleTo("Infrastructure.Test")]
 
@@ -72,7 +73,7 @@ public static class Startup
             .UseRequestLocalization()
             .UseStaticFiles()
             .UseSecurityHeaders(config)
-            //.UseFileStorage()
+            .UseFileStorage()
             .UseExceptionMiddleware()
             .UseRouting()
             .UseCorsPolicy()

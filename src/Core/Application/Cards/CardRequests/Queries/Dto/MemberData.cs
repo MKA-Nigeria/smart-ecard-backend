@@ -17,7 +17,7 @@ public class MemberData
     public string? Address { get; set; }
     public string? Gender { get; set; }
     public DateTime? DateOfBirth { get; set; }
-    public string? PictureUrl { get; set; }
+    public string? PhotoUrl { get; set; }
     public Dictionary<string?, string?> CustomData { get; set; } = [];
 
 }

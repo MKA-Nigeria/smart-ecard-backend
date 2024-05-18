@@ -186,7 +186,7 @@ internal class TokenService : ITokenService
 
     private async Task<TokenResponse> GenerateTokensAndUpdateUser(ApplicationUser user)
     {
-        string token = GenerateJwt(user);
+        string token = await GenerateJwt(user);
 
         user.RefreshToken = GenerateRefreshToken();
         user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationInDays);
@@ -196,16 +196,27 @@ internal class TokenService : ITokenService
         return new TokenResponse(token, user.RefreshToken, user.RefreshTokenExpiryTime);
     }
 
-    private string GenerateJwt(ApplicationUser user) =>
-        GenerateEncryptedToken(GetSigningCredentials(), GetClaims(user));
+    private async Task<string> GenerateJwt(ApplicationUser user) =>
+        GenerateEncryptedToken(GetSigningCredentials(), await GetClaims(user));
 
-    private IEnumerable<Claim> GetClaims(ApplicationUser user) =>
-        new List<Claim>
+    private async Task<IEnumerable<Claim>> GetClaims(ApplicationUser user)
+    {
+        var claims = new List<Claim>
         {
             new(ClaimTypes.NameIdentifier, user.Id),
             new(ClaimTypes.Email, user.Email!),
             new(ClaimTypes.Name, user.UserName)
         };
+        var userRole = await _userManager.GetRolesAsync(user);
+        foreach (string role in userRole)
+        {
+            claims.Add(new(ClaimTypes.Role, role));
+        }
+        return claims;
+    }
+    
+       
+
 
     private static string GenerateRefreshToken()
     {

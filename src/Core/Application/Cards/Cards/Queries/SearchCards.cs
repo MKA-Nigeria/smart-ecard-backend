@@ -1,6 +1,8 @@
-﻿using Application.Cards.Cards.Dto;
+﻿using Application.Cards.CardRequests.Queries.Dto;
+using Application.Cards.Cards.Dto;
 using Application.Common.Models;
 using Domain.Enums;
+using Mapster;
 
 namespace Application.Cards.Cards.Queries;
 
@@ -30,8 +32,11 @@ public class SearchCardstHandler(IRepository<Card> repository, IRepository<CardR
                 DateCollected = item.DateCollected,
                 RequestDate = cardRequest.CreatedOn,
                 CardStatus = item.Status,
-                ApprovedBy = "Admin"
+                ApprovedBy = "Admin",
+                MemberData = cardRequest.CardData.Adapt<MemberData>(),
             };
+            cardDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
+            cardDto.MemberData.EntityId = cardRequest.ExternalId;
             cardsDto.Add(cardDto);
         }
 

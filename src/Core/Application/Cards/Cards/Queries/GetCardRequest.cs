@@ -1,7 +1,10 @@
-﻿using Application.Cards.Cards.Dto;
+﻿using Application.Cards.CardRequests.Queries.Dto;
+using Application.Cards.Cards.Dto;
 using Application.Common.Exceptions;
 using Application.Common.Interfaces;
 using Application.Identity.Users;
+using Domain.Cards;
+using Mapster;
 
 namespace Application.Cards.Cards.Queries;
 public class GetCardRequest : IRequest<CardDto>
@@ -36,8 +39,10 @@ public class GetCardRequestHandler(IRepository<Card> repository, IRepository<Car
             RequestDate = cardRequest.CreatedOn,
             CardStatus = card.Status,
             ApprovedBy = $"{user.FirstName} {user.LastName}",
-            CustomData = cardRequest.CustomData
+            MemberData = cardRequest.CardData.Adapt<MemberData>(),
         };
+        cardDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
+        cardDto.MemberData.EntityId = cardRequest.ExternalId;
         return cardDto;
     }
 }

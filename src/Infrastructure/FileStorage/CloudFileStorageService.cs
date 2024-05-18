@@ -1,12 +1,14 @@
 ﻿using Application.Common.FileStorage;
 using Domain.Common;
 using Infrastructure.Common.Extensions;
+using Microsoft.AspNetCore.Hosting;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace maanportal.Infrastructure.FileStorage;
-public class LocalFileStorageService : IFileStorageService
+public class LocalFileStorageService(IWebHostEnvironment webHostEnvironment) : IFileStorageService
 {
+
     public async Task<string> UploadAsync<T>(FileUploadRequest? request, FileType supportedFileType, CancellationToken cancellationToken = default)
     where T : class
     {
@@ -31,12 +33,14 @@ public class LocalFileStorageService : IFileStorageService
                 folder = folder.Replace(@"\", "/");
             }
 
+            string wwrootPath = webHostEnvironment.WebRootPath;
+
             string folderName = supportedFileType switch
             {
-                FileType.Image => Path.Combine("Files", "Images", folder),
-                _ => Path.Combine("Files", "Others", folder),
+                FileType.Image => Path.Combine(wwrootPath, "Images"),
+                _ => Path.Combine(wwrootPath, "Others"),
             };
-            string pathToSave = Path.Combine(Directory.GetCurrentDirectory(), folderName);
+            string pathToSave = Path.Combine(folderName);
             Directory.CreateDirectory(pathToSave);
 
             string fileName = request.Name.Trim('"');
@@ -53,7 +57,7 @@ public class LocalFileStorageService : IFileStorageService
 
             using var stream = new FileStream(fullPath, FileMode.Create);
             await streamData.CopyToAsync(stream, cancellationToken);
-            return dbPath.Replace("\\", "/");
+            return $"Images/{fileName}";
         }
         else
         {

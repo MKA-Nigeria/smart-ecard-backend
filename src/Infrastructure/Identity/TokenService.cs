@@ -20,6 +20,7 @@ using Shared.Helper;
 using Infrastructure.Auditing;
 using Application.Common.Persistence;
 using Domain.Entities;
+using Shared.Configurations;
 
 namespace Infrastructure.Identity;
 internal class TokenService : ITokenService
@@ -90,7 +91,7 @@ internal class TokenService : ITokenService
             if (userData is not null)
             {
                 // check external authentication
-                var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
+                var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request) ?? throw new UnauthorizedException("Invalid credentials");
                 dynamic loginData;
                 try
                 {
@@ -98,17 +99,19 @@ internal class TokenService : ITokenService
                 }
                 catch (System.Text.Json.JsonException ex)
                 {
-                    throw new InvalidCastException($"JSON parsing error: {ex.Message}");
+                    throw new UnauthorizedException("Invalid credentials");
                 }
 
-                var loginModelData = await _configRepo.FirstOrDefaultAsync(x => x.Key == "LoginData");
-                if(loginModelData == null || loginModelData.Value == null)
+                var userModelData = await _configRepo.FirstOrDefaultAsync(x => x.Key == ConfigurationKeys.ExternalEntityData, cancellationToken);
+
+                if(userModelData == null || userModelData.Value == null)
                 {
                     throw new Exception($"Login Model Data not provided");
                 }
 
+
                 // Deserialize the JSON string into a dictionary
-                Dictionary<string, string> keyValuePairs = JsonConvert.DeserializeObject<Dictionary<string, string>>(loginModelData.Value);
+                Dictionary<string, string> keyValuePairs = JsonConvert.DeserializeObject<Dictionary<string, string>>(userModelData.Value);
 
                 if (loginData != null)
                 {
@@ -119,7 +122,7 @@ internal class TokenService : ITokenService
                             Email = userData[keyValuePairs["Email"]],
                             FirstName = userData[keyValuePairs["FirstName"]],
                             LastName = userData[keyValuePairs["LastName"]],
-                            UserName = userData[keyValuePairs["UserName"]],
+                            UserName = request.UserName,
                             PhoneNumber = userData[keyValuePairs["PhoneNumber"]],
                             IsActive = true,
                             EmailConfirmed = true

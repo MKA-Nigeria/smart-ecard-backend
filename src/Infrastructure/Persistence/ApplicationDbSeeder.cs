@@ -123,6 +123,7 @@ internal class ApplicationDbSeeder
             ["ExternalEntityData"] = "{\"FirstName\":\"firstName\",\"LastName\":\"surname\",\"DateOfBirth\":\"dateOfBirth\",\"Address\":\"address\",\"Email\":\"email\",\"PhoneNumber\":\"phoneNo\",\"Gender\":\"sex\", \"MiddleName\":\"middleName\"}",
             ["ExternalEntityAdditionalData"] = "{\"CheckAdditionalData\": true, \"CheckDataKey\": \"auxillaryBodyName\", \"AdditionalUrl\": {\"Lajna\": \"tytytyt\", \"Ansarullah\": \"ghjkhjh\", \"Khuddam\": \"https://tajneedapi.ahmadiyyanigeria.net/members/\"}, \"Khuddam\": {\"JamaatName\":\"jamaatName\",\"circuitName\":\"circuitName\"}}",
             ["CardData"] = "{\"Organisation\":\"SM\",\"Length\":4}",
+            ["ExternalLoginData"] = "{}"
         };
 
         foreach (string key in ConfigurationKeys.DefaultConfigurationKeys)

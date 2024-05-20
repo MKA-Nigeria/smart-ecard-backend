@@ -21,7 +21,7 @@ public class GetMemberRequestHandler(IGatewayHandler gateway, IRepository<AppCon
     private readonly IGatewayHandler _gateway = gateway;
     public async Task<BaseResponse<MemberData>> Handle(GetMemberRequest request, CancellationToken cancellationToken)
     {
-        var cardRequest = await _cardRequestRepo.FirstOrDefaultAsync(x => x.ExternalId.Equals(request.EntityId) && (x.Status != CardRequestStatus.Rejected || x.Status != CardRequestStatus.Cancelled));
+        var cardRequest = await _cardRequestRepo.FirstOrDefaultAsync(x => x.ExternalId.Equals(request.EntityId) && !(x.Status != CardRequestStatus.Rejected || x.Status != CardRequestStatus.Cancelled));
         if (cardRequest is not null)
         {
             return new BaseResponse<MemberData>

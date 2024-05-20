@@ -38,7 +38,7 @@ public class CardsController : VersionNeutralApiController
     }
 
     [HttpGet("{cardNumber}")]
-    [AllowAnonymous]
+    [MustHavePermission(AppAction.View, Resource.Card)]
     [OpenApiOperation("Get card requests", "")]
     public Task<CardDto> GetAsync(string cardNumber)
     {

@@ -40,7 +40,7 @@ public class CreateCardRequestHandler(IRepository<CardRequest> repository, IGate
     private readonly IFileStorageService _fileStorage = fileStorage;
     public async Task<DefaultIdType> Handle(CreateCardRequest request, CancellationToken cancellationToken)
     {
-        var existingCardRequest = await _repository.FirstOrDefaultAsync(x => x.ExternalId == request.ExternalId && (x.Status != CardRequestStatus.Rejected || x.Status != CardRequestStatus.Cancelled), cancellationToken);
+        var existingCardRequest = await _repository.FirstOrDefaultAsync(x => x.ExternalId == request.ExternalId && !(x.Status != CardRequestStatus.Rejected || x.Status != CardRequestStatus.Cancelled), cancellationToken);
         if(existingCardRequest != null)
         {
             throw new ForbiddenException("The member has an existing card");

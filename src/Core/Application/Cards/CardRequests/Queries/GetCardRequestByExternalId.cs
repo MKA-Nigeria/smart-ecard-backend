@@ -11,7 +11,7 @@ public class GetCardRequestByExternalIdHandler(IRepository<CardRequest> reposito
 {
     public async Task<CardRequestDto> Handle(GetCardRequestByExternalId request, CancellationToken cancellationToken)
     {
-        var cardRequest = await repository.GetByExpressionAsync(x => x.ExternalId == request.EntityId && x.Status == CardRequestStatus.Pending, cancellationToken);
+        var cardRequest = await repository.GetByExpressionAsync(x => x.ExternalId == request.EntityId && x.Status == CardRequestStatus.Pending, cancellationToken) ?? throw new Exception($"No card request for {request.EntityId}");
         var cardRequestDto = new CardRequestDto
         {
             MemberData = cardRequest.CardData.Adapt<MemberData>(),

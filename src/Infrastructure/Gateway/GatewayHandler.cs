@@ -57,6 +57,62 @@ public class GatewayHandler : IGatewayHandler
         return await jsonResponse.Content.ReadAsStringAsync();
     }
 
+    public async Task<dynamic> GetCardRecordsAsync()
+    {
+        var externalCardRecordUrl = await _configRepository.GetByExpressionAsync(x => x.Key == ConfigurationKeys.ExternalCardRecordDataUrl);
+        if (externalCardRecordUrl is null || externalCardRecordUrl.Value is null)
+        {
+            _logger.LogInformation("externalCardRecordUrl not configured");
+            throw new InvalidOperationException("externalCardRecordUrl not found");
+        }
+
+        var url = $"{externalCardRecordUrl.Value}";
+        var request = new HttpRequestMessage()
+        {
+            RequestUri = new Uri(url),
+            Method = HttpMethod.Get
+        };
+        request.Headers.Add("ApiKey", _config.GetSection("ApiKey").Value);
+
+        try
+        {
+            var response = await _client.SendAsync(request);
+            _logger.LogInformation("Get Entity Data response: {response}", response.Content);
+            //response.EnsureSuccessStatusCode();
+            if (response.IsSuccessStatusCode)
+            {
+                // Reading the response as string
+                string jsonResponse = await response.Content.ReadAsStringAsync();
+
+                // Optionally, check if the jsonResponse is not null or empty
+                if (string.IsNullOrEmpty(jsonResponse))
+                {
+                    _logger.LogWarning("Received empty response ");
+                    return null; // or throw an appropriate exception
+                }
+
+                // Deserialize the JSON response
+                dynamic data = JsonConvert.DeserializeObject<dynamic>(jsonResponse, new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    Converters = { new ExpandoObjectConverter() }
+                });
+                return data;
+            }
+            return null;
+        }
+        catch (HttpRequestException hre)
+        {
+            _logger.LogError("HTTP Request failed: {Message}", hre.Message);
+            throw new Exception($"HTTP Request failed: {hre.Message}");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("An error occurred: {Message}", ex.Message);
+            throw; // Rethrow the current exception without losing stack trace
+        }
+    }
+
     public async Task<dynamic> GetEntityAsync(string entityId)
     {
         var externalEntityUrl = await _configRepository.GetByExpressionAsync(x => x.Key == ConfigurationKeys.ExternalEntityUrl);

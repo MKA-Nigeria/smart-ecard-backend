@@ -5,5 +5,6 @@ public interface IGatewayHandler
 {
     Task<dynamic> ExternalLoginAsync(TokenRequest request);
     Task<dynamic> GetEntityAsync(string entityId);
+    Task<dynamic> GetCardRecordsAsync();
     Task<dynamic> GetEntityAsync(string url, string entityId);
 }

@@ -119,8 +119,10 @@ internal class ApplicationDbSeeder
             ["AppDomain"] = "DefaultApp",
             ["ExternalLoginUrl"] = "https://domain/token",
             ["ExternalLoginData"] = "https://domain/{entityId}",
-            ["ExternalEntityUrl"] = "{\"FirstName\":\"firstName\",\"LastName\":\"surname\",\"MiddleName\":\"middleName\",\"DateOfBirth\":\"dateOfBirth\",\"Address\":\"address\",\"Email\":\"email\",\"PhoneNumber\":\"phoneNo\",\"Gender\":\"sex\"}",
+            ["ExternalCardRecordDataUrl"] = "https://domain/",
+            ["ExternalEntityUrl"] = "https://domain/",
             ["ExternalEntityData"] = "{\"FirstName\":\"firstName\",\"LastName\":\"surname\",\"DateOfBirth\":\"dateOfBirth\",\"Address\":\"address\",\"Email\":\"email\",\"PhoneNumber\":\"phoneNo\",\"Gender\":\"sex\", \"MiddleName\":\"middleName\"}",
+            ["ExternalCardRecordData"] = "{\"FirstName\":\"firstName\",\"LastName\":\"surname\",\"DateOfBirth\":\"dateOfBirth\",\"Address\":\"address\",\"Email\":\"email\",\"PhoneNumber\":\"phoneNo\",\"Gender\":\"sex\", \"MiddleName\":\"middleName\"}",
             ["ExternalEntityAdditionalData"] = "{\"CheckAdditionalData\": true, \"CheckDataKey\": \"auxillaryBodyName\", \"AdditionalUrl\": {\"Lajna\": \"tytytyt\", \"Ansarullah\": \"ghjkhjh\", \"Khuddam\": \"https://tajneedapi.ahmadiyyanigeria.net/members/\"}, \"Khuddam\": {\"JamaatName\":\"jamaatName\",\"circuitName\":\"circuitName\"}}",
             ["CardData"] = "{\"Organisation\":\"SM\",\"Length\":4}",
             ["ExternalLoginData"] = "{}"

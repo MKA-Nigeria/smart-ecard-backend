@@ -25,7 +25,7 @@ public class GetCardRequestHandler(IRepository<Card> repository, IRepository<Car
     {
         var card = await repository.FirstOrDefaultAsync(x => x.CardNumber == request.CardNumber || x.CardRequest.ExternalId == request.CardNumber, cancellationToken) ?? throw new Exception("Invalid card number");
         var cardRequest = await cardRequestRepository.FirstOrDefaultAsync(x => x.Id == card.CardRequestId, cancellationToken);
-        var user = await userService.GetAsync(card.CreatedBy.ToString(), cancellationToken);
+        //var user = await userService.GetAsync(card.CreatedBy.ToString(), cancellationToken);
         var cardDto = new CardDto
         {
             //Id = item.Id,
@@ -38,7 +38,7 @@ public class GetCardRequestHandler(IRepository<Card> repository, IRepository<Car
             DateCollected = card.DateCollected,
             RequestDate = cardRequest.CreatedOn,
             CardStatus = card.Status,
-            ApprovedBy = $"{user.FirstName} {user.LastName}",
+            //ApprovedBy = $"{user.FirstName} {user.LastName}",
             MemberData = cardRequest.CardData.Adapt<MemberData>(),
         };
         cardDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();

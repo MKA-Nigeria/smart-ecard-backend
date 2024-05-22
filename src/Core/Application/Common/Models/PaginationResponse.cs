@@ -4,10 +4,10 @@ public class PaginationResponse<T>
 {
     public PaginationResponse(List<T> data, int count, int page, int pageSize)
     {
-        Data = data.Skip(page).ToList();
+        Data = data.Skip(page * pageSize).ToList();
         if (pageSize is not 0)
         {
-            Data = data.Take(pageSize).ToList();
+            Data = Data.Take(pageSize).ToList();
         }
 
         CurrentPage = page;

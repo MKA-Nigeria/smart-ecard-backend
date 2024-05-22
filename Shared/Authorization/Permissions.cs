@@ -17,6 +17,7 @@ public static class AppAction
 public static class Resource
 {
     public const string Users = nameof(Users);
+    public const string Dashboard = nameof(Dashboard);
     public const string AppConfigurations = nameof(AppConfigurations);
     public const string CardRequest = nameof(CardRequest);
     public const string Lookups = nameof(Lookups);
@@ -30,6 +31,9 @@ public static class Permissions
 {
     private static readonly Permission[] _all =
     [
+        new("View Dashboard", AppAction.View, Resource.Dashboard),
+
+
         new("View Users", AppAction.View, Resource.Users),
         new("Search Users", AppAction.Search, Resource.Users),
         new("Create Users", AppAction.Create, Resource.Users),

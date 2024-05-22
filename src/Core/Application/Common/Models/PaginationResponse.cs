@@ -4,7 +4,12 @@ public class PaginationResponse<T>
 {
     public PaginationResponse(List<T> data, int count, int page, int pageSize)
     {
-        Data = data;
+        Data = data.Skip(page).ToList();
+        if (pageSize is not 0)
+        {
+            Data = data.Take(pageSize).ToList();
+        }
+
         CurrentPage = page;
         PageSize = pageSize;
         TotalPages = (int)Math.Ceiling(count / (double)pageSize);

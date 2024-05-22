@@ -76,11 +76,11 @@ public class MigrateCardRequestHandler(IGatewayHandler _gateway, IRepository<Car
             await _cardRequestRepository.AddAsync(cardRequest, cancellationToken);
 
             var userId = _currentUser.GetUserId();
-            bool isPrinted = (bool)item[cardRecords["IsCollected"]];
-            bool isCollected = (bool)item[cardRecords["IsPrinted"]];
+            bool isPrinted = item[cardRecords["IsPrinted"]] != null && (bool)item[cardRecords["IsPrinted"]];
+            bool isCollected = item[cardRecords["IsCollected"]] != null && (bool)item[cardRecords["IsCollected"]];
             await CreateCard(cardRequest, userId, isPrinted, isCollected);
         }
-        await _cardRequestRepository.SaveChangesAsync();
+        await _cardRequestRepository.SaveChangesAsync(cancellationToken);
         return "Card Succesfully migrated";
     }
 

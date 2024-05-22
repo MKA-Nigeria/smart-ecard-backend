@@ -41,6 +41,9 @@ public class SearchCardstHandler(IRepository<Card> repository, IRepository<CardR
         }
 
         cardsDto = string.IsNullOrEmpty(request.Keyword) ? cardsDto : [.. cardsDto.SearchByKeyword(request.Keyword)];
-        return new PaginationResponse<CardDto>(cardsDto, cardsDto.Count, request.PageNumber, request.PageSize);
+
+        var cardPaginationResponse = new PaginationResponse<CardDto>(cardsDto, cardsDto.Count, request.PageNumber, request.PageSize);
+
+        return cardPaginationResponse;
     }
 }

@@ -42,14 +42,17 @@ internal class TokenService : ITokenService
     public async Task<TokenResponse> GetTokenAsync(TokenRequest request, CancellationToken cancellationToken)
     {
         var user = await _userManager.FindByNameAsync(request.UserName.Trim().Normalize());
+
         if (user is not null)
         {
             bool isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+
             if (!isPasswordValid)
             {
                 // check external authentication
                 var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
                 LoginResponse loginData;
+
                 try
                 {
                     loginData = JsonConvert.DeserializeObject<dynamic>(loginJsonString);

@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 
 public class CardRequestConfiguration : IEntityTypeConfiguration<CardRequest>
 {

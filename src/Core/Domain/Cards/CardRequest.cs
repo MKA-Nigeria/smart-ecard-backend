@@ -11,6 +11,7 @@ public class CardRequest : AuditableEntity, IAggregateRoot
     public CardRequestStatus Status { get; private set; }
     public string? ReasonForRejection { get; private set; }
     public CardRequestData CardData { get; private set; }
+    public byte[]? PhotoImage { get; set; }
     public  Card Card { get; private set; }
     // other custom data
     public virtual IDictionary<string, string> CustomData { get; private set; }
@@ -20,7 +21,7 @@ public class CardRequest : AuditableEntity, IAggregateRoot
 
     private CardRequest() { }
 
-    public CardRequest(string externalId, BiometricData? biometrics, CardRequestData cardRequestData, IDictionary<string, string> customData, CardRequestStatus status = CardRequestStatus.Pending)
+    public CardRequest(string externalId, BiometricData? biometrics, CardRequestData cardRequestData, IDictionary<string, string> customData, CardRequestStatus status = CardRequestStatus.Pending, byte[]? photoImage = null)
     {
         ExternalId = externalId;
         RequestDate = DateTime.UtcNow;
@@ -28,6 +29,7 @@ public class CardRequest : AuditableEntity, IAggregateRoot
         Biometrics = biometrics;
         CardData = cardRequestData;
         CustomData = customData;
+        PhotoImage = photoImage;
     }
 
     public void Approve(Guid userId)
@@ -58,6 +60,6 @@ public class CardRequest : AuditableEntity, IAggregateRoot
 
     public void UpdatePhotoImage(byte[] image)
     {
-        CardData.PhotoImage = image;
+        PhotoImage = image;
     }
 }

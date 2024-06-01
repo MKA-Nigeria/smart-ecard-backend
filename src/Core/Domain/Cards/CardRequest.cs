@@ -55,4 +55,9 @@ public class CardRequest : AuditableEntity, IAggregateRoot
 
         Status = CardRequestStatus.Cancelled;
     }
+
+    public void UpdatePhotoImage(byte[] image)
+    {
+        CardData.PhotoImage = image;
+    }
 }

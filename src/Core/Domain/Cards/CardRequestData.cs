@@ -13,9 +13,8 @@ public class CardRequestData
     public string? Email { get; set; }
     public string? PhoneNumber { get; set; }
     public string PhotoUrl { get; set; }
-    public byte[]? PhotoImage { get; set; }
     public Gender Gender { get; set; }
-    public CardRequestData(string firstName, string lastName, string middleName, DateTime dateOfBirth, string address, string? email, string? phoneNumber, string photoUrl, byte[] photoImage, Gender gender)
+    public CardRequestData(string firstName, string lastName, string middleName, DateTime dateOfBirth, string address, string? email, string? phoneNumber, string photoUrl, Gender gender)
     {
         FirstName = firstName ?? throw new ArgumentNullException(nameof(firstName));
         LastName = lastName ?? throw new ArgumentNullException(nameof(lastName));
@@ -25,7 +24,6 @@ public class CardRequestData
         Email = email;
         PhoneNumber = phoneNumber;
         PhotoUrl = photoUrl ?? throw new ArgumentNullException(nameof(photoUrl));
-        PhotoImage = photoImage;
         Gender = gender;
     }
 

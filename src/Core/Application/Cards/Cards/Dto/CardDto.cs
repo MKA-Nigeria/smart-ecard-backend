@@ -20,5 +20,6 @@ public class CardDto
     public DateTime RequestDate { get; set; }
     public DateTime ApprovedDate { get; set; }
     public string? ApprovedBy { get; set; }
+    public string? QrCode { get; set; }
     public MemberData MemberData { get; set; }
 }

@@ -9,4 +9,6 @@ public interface IFileStorageService : ITransientService
     where T : class;
 
     public void Remove(string? path);
+
+    Task<string> GetImageDataAsync(string imagePath);
 }

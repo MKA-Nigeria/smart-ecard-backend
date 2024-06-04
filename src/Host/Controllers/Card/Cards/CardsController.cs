@@ -9,6 +9,9 @@ using Application.Cards.Cards.Dto;
 using Application.Cards.CardRequests.Commands;
 using Application.Cards.Cards.Commands;
 using Microsoft.AspNetCore.Authorization;
+using System.Drawing.Imaging;
+using System.Drawing;
+using QRCoder;
 
 namespace Host.Controllers.Card.Cards;
 public class CardsController : VersionNeutralApiController
@@ -36,13 +39,30 @@ public class CardsController : VersionNeutralApiController
     {
         return Mediator.Send(new DeactivateCardRequest { CardNumber = cardNumber });
     }
-
+    [AllowAnonymous]
     [HttpGet("{cardNumber}")]
-    [MustHavePermission(AppAction.View, Resource.Card)]
+   // [MustHavePermission(AppAction.View, Resource.Card)]
     [OpenApiOperation("Get card requests", "")]
-    public Task<CardDto> GetAsync(string cardNumber)
+    public async Task<CardDto> GetAsync(string cardNumber)
     {
-        return Mediator.Send(new GetCardRequest { CardNumber = cardNumber });
+        var response = await Mediator.Send(new GetCardRequest { CardNumber = cardNumber });
+        response.QrCode = await GenerateQRCode(response.CardNumber);
+        return response;
     }
 
+    public async Task<string> GenerateQRCode(string qRCodeText)
+    {
+        if (!string.IsNullOrEmpty(qRCodeText))
+        {
+            using MemoryStream ms = new();
+            QRCodeGenerator qrCodeGenerate = new();
+            QRCodeData qrCodeData = qrCodeGenerate.CreateQrCode(qRCodeText, QRCodeGenerator.ECCLevel.Q);
+            QRCode qrCode = new(qrCodeData);
+            using Bitmap qrBitMap = qrCode.GetGraphic(20);
+            qrBitMap.Save(ms, ImageFormat.Png);
+            string base64 = Convert.ToBase64String(ms.ToArray());
+            return string.Format("data:image/png;base64,{0}", base64);
+        }
+        return null;
+    }
 }

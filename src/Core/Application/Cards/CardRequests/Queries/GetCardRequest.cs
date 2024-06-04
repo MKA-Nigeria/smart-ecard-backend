@@ -1,4 +1,6 @@
 ﻿using Application.Cards.CardRequests.Queries.Dto;
+using Application.Common.FileStorage;
+using Domain.Cards;
 using Mapster;
 
 namespace Application.Cards.CardRequests.Queries;
@@ -14,11 +16,13 @@ public class GetCardRequestValidator : CustomValidator<GetCardRequest>
     }
 
 }
-public class GetCardRequestHandler(IRepository<CardRequest> repository) : IRequestHandler<GetCardRequest, CardRequestDto>
+public class GetCardRequestHandler(IRepository<CardRequest> repository, IFileStorageService fileStorageService) : IRequestHandler<GetCardRequest, CardRequestDto>
 {
     public async Task<CardRequestDto> Handle(GetCardRequest request, CancellationToken cancellationToken)
     {
         var cardRequest = await repository.GetByExpressionAsync(x => x.Id == request.CardRequestId, cancellationToken);
+        string imageData = await fileStorageService.GetImageDataAsync(cardRequest.CardData.PhotoUrl);
+
         var cardRequestDto = new CardRequestDto
         {
             MemberData = cardRequest.CardData.Adapt<MemberData>(),
@@ -28,6 +32,7 @@ public class GetCardRequestHandler(IRepository<CardRequest> repository) : IReque
         };
         cardRequestDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
         cardRequestDto.MemberData.EntityId = cardRequest.ExternalId;
+        cardRequestDto.MemberData.PhotoUrl = imageData;
         return cardRequestDto;
     }
 }

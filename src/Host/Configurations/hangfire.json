@@ -21,7 +21,7 @@
     },
     "Storage": {
       "StorageProvider": "mssql",
-      "ConnectionString": "Data Source=(localdb)\\MSSQLLocalDB;Initial Catalog=TEST; Integrated Security=True; Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;",
+      "ConnectionString": "Data Source=108.166.181.227;Database=NewEcardDB;User Id=sa;Password=T@jneed2023;TrustServerCertificate=True",
       "Options": {
         "CommandBatchMaxTimeout": "00:05:00",
         "QueuePollInterval": "00:00:01",

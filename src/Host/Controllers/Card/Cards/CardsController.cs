@@ -12,6 +12,11 @@ using Microsoft.AspNetCore.Authorization;
 using System.Drawing.Imaging;
 using System.Drawing;
 using QRCoder;
+using ZXing;
+using ZXing.QrCode;
+using ZXing.Common;
+using SkiaSharp;
+using static QRCoder.QRCodeGenerator;
 
 namespace Host.Controllers.Card.Cards;
 public class CardsController : VersionNeutralApiController
@@ -46,11 +51,11 @@ public class CardsController : VersionNeutralApiController
     public async Task<CardDto> GetAsync(string cardNumber)
     {
         var response = await Mediator.Send(new GetCardRequest { CardNumber = cardNumber });
-        //response.QrCode = await GenerateQRCode(response.CardNumber);
+        response.QrCode = GenerateQRCode(response.CardNumber);
         return response;
     }
 
-    public async Task<string> GenerateQRCode(string qRCodeText)
+    /*public async Task<string> GenerateQRCode(string qRCodeText)
     {
         if (!string.IsNullOrEmpty(qRCodeText))
         {
@@ -64,5 +69,43 @@ public class CardsController : VersionNeutralApiController
             return string.Format("data:image/png;base64,{0}", base64);
         }
         return null;
+    }*/
+
+    public string GenerateQRCode(string text)
+    {
+        var qrCodeGenerator = new QRCodeGenerator();
+        var qrCode = qrCodeGenerator.CreateQrCode(text, ECCLevel.Q);
+
+        var info = new SKImageInfo(300, 300);
+        using (var surface = SKSurface.Create(info))
+        {
+            var canvas = surface.Canvas;
+            canvas.Clear(SKColors.White);
+
+            float scale = info.Width / (float)qrCode.ModuleMatrix.Count;
+            var paint = new SKPaint
+            {
+                Color = SKColors.Black,
+                Style = SKPaintStyle.Fill
+            };
+
+            for (int y = 0; y < qrCode.ModuleMatrix.Count; y++)
+            {
+                for (int x = 0; x < qrCode.ModuleMatrix[y].Count; x++)
+                {
+                    if (qrCode.ModuleMatrix[y][x])
+                    {
+                        canvas.DrawRect(x * scale, y * scale, scale, scale, paint);
+                    }
+                }
+            }
+
+            using (var image = surface.Snapshot())
+            using (var data = image.Encode(SKEncodedImageFormat.Png, 100))
+            {
+                string base64 = Convert.ToBase64String(data.ToArray());
+                return $"data:image/png;base64,{base64}";
+            }
+        }
     }
 }

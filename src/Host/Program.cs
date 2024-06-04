@@ -1,5 +1,4 @@
 using Serilog;
-using Serilog.Formatting.Compact;
 using Application;
 using Host.Controllers;
 using Infrastructure;
@@ -7,7 +6,6 @@ using Infrastructure.Common;
 using Infrastructure.Logging.Serilog;
 using Microsoft.AspNetCore.Mvc;
 using Host.Configurations;
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 
 [assembly: ApiConventionType(typeof(ApiConventions))]
 

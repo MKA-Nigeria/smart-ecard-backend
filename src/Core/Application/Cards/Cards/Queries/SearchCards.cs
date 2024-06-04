@@ -22,7 +22,7 @@ public class SearchCardstHandler(IRepository<Card> repository, IRepository<CardR
         foreach (var item in activeCards)
         {
             var cardRequest = await cardRequestRepository.FirstOrDefaultAsync(x => x.Id == item.CardRequestId, cancellationToken);
-            string imageData = await fileStorageService.GetImageDataAsync(cardRequest.CardData.PhotoUrl);
+            //string imageData = await fileStorageService.GetImageDataAsync(cardRequest.CardData.PhotoUrl);
             var cardDto = new CardDto
             {
                 //Id = item.Id,
@@ -40,7 +40,7 @@ public class SearchCardstHandler(IRepository<Card> repository, IRepository<CardR
             };
             cardDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
             cardDto.MemberData.EntityId = cardRequest.ExternalId;
-            cardDto.MemberData.PhotoUrl = imageData;
+            cardDto.MemberData.PhotoUrl = null;
             cardsDto.Add(cardDto);
         }
 

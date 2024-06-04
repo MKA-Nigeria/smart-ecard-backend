@@ -46,7 +46,7 @@ public class CardsController : VersionNeutralApiController
     public async Task<CardDto> GetAsync(string cardNumber)
     {
         var response = await Mediator.Send(new GetCardRequest { CardNumber = cardNumber });
-        response.QrCode = await GenerateQRCode(response.CardNumber);
+        //response.QrCode = await GenerateQRCode(response.CardNumber);
         return response;
     }
 

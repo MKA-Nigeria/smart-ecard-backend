@@ -1,6 +1,8 @@
 ﻿using Application.Cards.CardRequests.Queries.Dto;
 using Application.Cards.Cards.Dto;
+using Application.Common.FileStorage;
 using Application.Common.Models;
+using Domain.Cards;
 using Domain.Enums;
 using Mapster;
 
@@ -11,7 +13,7 @@ public class SearchCardsRequest : PaginationFilter, IRequest<PaginationResponse<
 
 }
 
-public class SearchCardstHandler(IRepository<Card> repository, IRepository<CardRequest> cardRequestRepository) : IRequestHandler<SearchCardsRequest, PaginationResponse<CardDto>>
+public class SearchCardstHandler(IRepository<Card> repository, IRepository<CardRequest> cardRequestRepository, IFileStorageService fileStorageService) : IRequestHandler<SearchCardsRequest, PaginationResponse<CardDto>>
 {
     public async Task<PaginationResponse<CardDto>> Handle(SearchCardsRequest request, CancellationToken cancellationToken)
     {
@@ -20,6 +22,7 @@ public class SearchCardstHandler(IRepository<Card> repository, IRepository<CardR
         foreach (var item in activeCards)
         {
             var cardRequest = await cardRequestRepository.FirstOrDefaultAsync(x => x.Id == item.CardRequestId, cancellationToken);
+            string imageData = await fileStorageService.GetImageDataAsync(cardRequest.CardData.PhotoUrl);
             var cardDto = new CardDto
             {
                 //Id = item.Id,
@@ -37,6 +40,7 @@ public class SearchCardstHandler(IRepository<Card> repository, IRepository<CardR
             };
             cardDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
             cardDto.MemberData.EntityId = cardRequest.ExternalId;
+            cardDto.MemberData.PhotoUrl = imageData;
             cardsDto.Add(cardDto);
         }
 

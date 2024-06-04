@@ -1,21 +1,14 @@
-﻿using Application.Common.FileStorage;
-using BunnyCDN.Net.Storage;
+﻿/*using Application.Common.FileStorage;
 using Domain.Common;
 using Infrastructure.Common.Extensions;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace maanportal.Infrastructure.FileStorage;
-public class CloudFileStorageService(IWebHostEnvironment webHostEnvironment) : IFileStorageService
+public class LocalFileStorageService(IWebHostEnvironment webHostEnvironment) : IFileStorageService
 {
-    private const string _storageZoneName = "smartcard"; // Replace with your storage zone name
-    private const string _accessKey = "b630398a-cad6-498d-b8aa5656cdec-2a4f-411d"; // Replace with your Bunny.net access key
-    private const string _region = "jh"; // Replace with your region (empty string for Germany)
     public async Task<string> UploadAsync<T>(FileUploadRequest? request, FileType supportedFileType, CancellationToken cancellationToken = default)
     where T : class
     {
@@ -34,14 +27,37 @@ public class CloudFileStorageService(IWebHostEnvironment webHostEnvironment) : I
         var streamData = new MemoryStream(Convert.FromBase64String(base64Data));
         if (streamData.Length > 0)
         {
+            string folder = typeof(T).Name;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                folder = folder.Replace(@"\", "/");
+            }
+
+            string wwrootPath = webHostEnvironment.WebRootPath;
+
+            string folderName = supportedFileType switch
+            {
+                FileType.Image => Path.Combine(wwrootPath, "Images"),
+                _ => Path.Combine(wwrootPath, "Others"),
+            };
+            string pathToSave = Path.Combine(folderName);
+            Directory.CreateDirectory(pathToSave);
+
             string fileName = request.Name.Trim('"');
             fileName = RemoveSpecialCharacters(fileName);
             fileName = fileName.ReplaceWhitespace("-");
             fileName += request.Extension.Trim();
-            string path = $"/{_storageZoneName}/{fileName}";
-            var bunnyCDNStorage = new BunnyCDNStorage(_storageZoneName, _accessKey, _region);
-            await bunnyCDNStorage.UploadAsync(streamData, path);
-            return path;
+            string fullPath = Path.Combine(pathToSave, fileName);
+            string dbPath = Path.Combine(folderName, fileName);
+            if (File.Exists(dbPath))
+            {
+                dbPath = NextAvailableFilename(dbPath);
+                fullPath = NextAvailableFilename(fullPath);
+            }
+
+            using var stream = new FileStream(fullPath, FileMode.Create);
+            await streamData.CopyToAsync(stream, cancellationToken);
+            return $"Images/{fileName}";
         }
         else
         {
@@ -111,44 +127,4 @@ public class CloudFileStorageService(IWebHostEnvironment webHostEnvironment) : I
 
         return string.Format(pattern, max);
     }
-
-    public static async Task DownloadFileFromBunnyNet(string fileName, string downloadPath)
-    {
-        var bunnyCDNStorage = new BunnyCDNStorage(_storageZoneName, _accessKey, _region);
-
-        using (var fileStream = System.IO.File.OpenWrite(downloadPath))
-        {
-            await bunnyCDNStorage.DownloadObjectAsStreamAsync(fileName);
-            //await bunnyCDNStorage.DownloadObjectAsStreamAsync("/storagezonename/helloworld.txt");
-        }
-    }
-
-    public async Task<string> GetImageDataAsync(string imagePath)
-    {
-        var bunnyCDNStorage = new BunnyCDNStorage(_storageZoneName, _accessKey, _region);
-
-        try
-        {
-            // Download the image as a stream from BunnyCDN
-            using (var stream = await bunnyCDNStorage.DownloadObjectAsStreamAsync(imagePath))
-            {
-                if (stream == null)
-                {
-                    return null;
-                }
-
-                // Read the stream and convert it to byte array
-                using (var memoryStream = new MemoryStream())
-                {
-                    await stream.CopyToAsync(memoryStream);
-                    // Convert byte array to base64 string
-                    return Convert.ToBase64String(memoryStream.ToArray());
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Failed to retrieve image data: {ex.Message}");
-        }
-    }
-}
+}*/

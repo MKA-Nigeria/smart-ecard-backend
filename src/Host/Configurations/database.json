@@ -1,7 +1,0 @@
-{
-  "DatabaseSettings": {
-    "DBProvider": "mssql",
-
-    "ConnectionString": "Data Source=.;Initial Catalog=TEST; Integrated Security=True; Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Trusted_Connection=True"
-  }
-}

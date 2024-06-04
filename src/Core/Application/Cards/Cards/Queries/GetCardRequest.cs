@@ -1,6 +1,7 @@
 ﻿using Application.Cards.CardRequests.Queries.Dto;
 using Application.Cards.Cards.Dto;
 using Application.Common.Exceptions;
+using Application.Common.FileStorage;
 using Application.Common.Interfaces;
 using Application.Identity.Users;
 using Domain.Cards;
@@ -19,13 +20,15 @@ public class GetCardRequestValidator : CustomValidator<GetCardRequest>
     }
 
 }
-public class GetCardRequestHandler(IRepository<Card> repository, IRepository<CardRequest> cardRequestRepository, IUserService userService) : IRequestHandler<GetCardRequest, CardDto>
+public class GetCardRequestHandler(IRepository<Card> repository, IRepository<CardRequest> cardRequestRepository, IUserService userService, IFileStorageService fileStorageService) : IRequestHandler<GetCardRequest, CardDto>
 {
     public async Task<CardDto> Handle(GetCardRequest request, CancellationToken cancellationToken)
     {
         var card = await repository.FirstOrDefaultAsync(x => x.CardNumber == request.CardNumber || x.CardRequest.ExternalId == request.CardNumber, cancellationToken) ?? throw new Exception("Invalid card number");
         var cardRequest = await cardRequestRepository.FirstOrDefaultAsync(x => x.Id == card.CardRequestId, cancellationToken);
         //var user = await userService.GetAsync(card.CreatedBy.ToString(), cancellationToken);
+        string imageData = await fileStorageService.GetImageDataAsync(card.CardRequest.CardData.PhotoUrl);
+
         var cardDto = new CardDto
         {
             //Id = item.Id,
@@ -43,6 +46,7 @@ public class GetCardRequestHandler(IRepository<Card> repository, IRepository<Car
         };
         cardDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
         cardDto.MemberData.EntityId = cardRequest.ExternalId;
+        cardDto.MemberData.PhotoUrl = imageData;
         return cardDto;
     }
 }

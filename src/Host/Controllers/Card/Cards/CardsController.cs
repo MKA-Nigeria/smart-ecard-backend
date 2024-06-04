@@ -39,9 +39,9 @@ public class CardsController : VersionNeutralApiController
     {
         return Mediator.Send(new DeactivateCardRequest { CardNumber = cardNumber });
     }
-
+    [AllowAnonymous]
     [HttpGet("{cardNumber}")]
-    [MustHavePermission(AppAction.View, Resource.Card)]
+   // [MustHavePermission(AppAction.View, Resource.Card)]
     [OpenApiOperation("Get card requests", "")]
     public async Task<CardDto> GetAsync(string cardNumber)
     {

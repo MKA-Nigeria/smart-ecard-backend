@@ -10,7 +10,9 @@ namespace Application.Cards.Cards.Queries;
 
 public class SearchCardsRequest : PaginationFilter, IRequest<PaginationResponse<CardDto>>
 {
-
+    public string? Printed { get; set; }
+    public string? Collected { get; set; }
+    public string? Active { get; set; }
 }
 
 public class SearchCardstHandler(IRepository<Card> repository, IRepository<CardRequest> cardRequestRepository, IFileStorageService fileStorageService) : IRequestHandler<SearchCardsRequest, PaginationResponse<CardDto>>
@@ -18,6 +20,11 @@ public class SearchCardstHandler(IRepository<Card> repository, IRepository<CardR
     public async Task<PaginationResponse<CardDto>> Handle(SearchCardsRequest request, CancellationToken cancellationToken)
     {
         var activeCards = await repository.ListAsync(cancellationToken);
+        activeCards = string.IsNullOrEmpty(request.Keyword) ? activeCards : [.. activeCards.SearchByKeyword(request.Keyword)];
+        activeCards = string.IsNullOrEmpty(request.Printed) ? activeCards : [.. activeCards.SearchByKeyword(request.Printed)];
+        activeCards = string.IsNullOrEmpty(request.Collected) ? activeCards : [.. activeCards.SearchByKeyword(request.Collected)];
+        activeCards = string.IsNullOrEmpty(request.Active) ? activeCards : [.. activeCards.SearchByKeyword(request.Active)];
+
         List<CardDto> cardsDto = [];
         foreach (var item in activeCards)
         {
@@ -43,8 +50,6 @@ public class SearchCardstHandler(IRepository<Card> repository, IRepository<CardR
             cardDto.MemberData.PhotoUrl = null;
             cardsDto.Add(cardDto);
         }
-
-        cardsDto = string.IsNullOrEmpty(request.Keyword) ? cardsDto : [.. cardsDto.SearchByKeyword(request.Keyword)];
 
         var cardPaginationResponse = new PaginationResponse<CardDto>(cardsDto, cardsDto.Count, request.PageNumber, request.PageSize);
 

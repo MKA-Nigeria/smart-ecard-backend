@@ -2,7 +2,6 @@
 using Application.Cards.Cards.Dto;
 using Application.Common.FileStorage;
 using Application.Common.Models;
-using Domain.Cards;
 using Domain.Enums;
 using Mapster;
 
@@ -10,9 +9,9 @@ namespace Application.Cards.Cards.Queries;
 
 public class SearchCardsRequest : PaginationFilter, IRequest<PaginationResponse<CardDto>>
 {
-    public string? Printed { get; set; }
-    public string? Collected { get; set; }
-    public string? Active { get; set; }
+    public PrintStatus? PrintStatus { get; set; }
+    public CardStatus? CardStatus { get; set; }
+    public bool? IsCollected { get; set; }
 }
 
 public class SearchCardstHandler(IRepository<Card> repository, IRepository<CardRequest> cardRequestRepository, IFileStorageService fileStorageService) : IRequestHandler<SearchCardsRequest, PaginationResponse<CardDto>>
@@ -21,9 +20,21 @@ public class SearchCardstHandler(IRepository<Card> repository, IRepository<CardR
     {
         var activeCards = await repository.ListAsync(cancellationToken);
         activeCards = string.IsNullOrEmpty(request.Keyword) ? activeCards : [.. activeCards.SearchByKeyword(request.Keyword)];
-        activeCards = string.IsNullOrEmpty(request.Printed) ? activeCards : [.. activeCards.SearchByKeyword(request.Printed)];
-        activeCards = string.IsNullOrEmpty(request.Collected) ? activeCards : [.. activeCards.SearchByKeyword(request.Collected)];
-        activeCards = string.IsNullOrEmpty(request.Active) ? activeCards : [.. activeCards.SearchByKeyword(request.Active)];
+        // Apply filters
+        if (request.IsCollected.HasValue)
+        {
+            activeCards = activeCards.Where(card => card.IsCollected == request.IsCollected.Value).ToList();
+        }
+
+        if (request.PrintStatus.HasValue)
+        {
+            activeCards = activeCards.Where(card => card.PrintStatus == request.PrintStatus.Value).ToList();
+        }
+
+        if (request.CardStatus.HasValue)
+        {
+            activeCards = activeCards.Where(card => card.Status == request.CardStatus.Value).ToList();
+        }
 
         List<CardDto> cardsDto = [];
         foreach (var item in activeCards)

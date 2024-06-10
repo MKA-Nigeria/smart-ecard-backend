@@ -37,6 +37,22 @@ public class CardsController : VersionNeutralApiController
         return Mediator.Send(new ActivateCardRequest { CardNumber = cardNumber });
     }
 
+    [HttpPut("{cardNumber}/print")]
+    [MustHavePermission(AppAction.Update, Resource.Card)]
+    [OpenApiOperation("Print card", "")]
+    public Task<Guid> PrintCard(string cardNumber)
+    {
+        return Mediator.Send(new SetCardPrintedRequest { CardNumber = cardNumber });
+    }
+
+    [HttpPut("{cardNumber}/collect")]
+    [MustHavePermission(AppAction.Update, Resource.Card)]
+    [OpenApiOperation("Collect card", "")]
+    public Task<Guid> CollectCard(string cardNumber)
+    {
+        return Mediator.Send(new SetCardCollectedRequest { CardNumber = cardNumber });
+    }
+
     [HttpPut("deactivate/{cardNumber}")]
     [MustHavePermission(AppAction.Update, Resource.Card)]
     [OpenApiOperation("Deactivae card", "")]
@@ -44,6 +60,7 @@ public class CardsController : VersionNeutralApiController
     {
         return Mediator.Send(new DeactivateCardRequest { CardNumber = cardNumber });
     }
+
     [AllowAnonymous]
     [HttpGet("{cardNumber}")]
    // [MustHavePermission(AppAction.View, Resource.Card)]

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Application.Common.Persistence;
 using Domain.Entities;
 using Shared.Configurations;
+using System.Net.Http;
 
 namespace Infrastructure.Gateway;
 public class GatewayHandler : IGatewayHandler
@@ -116,11 +117,16 @@ public class GatewayHandler : IGatewayHandler
     public async Task<dynamic> GetEntityAsync(string entityId)
     {
         var externalEntityUrl = await _configRepository.GetByExpressionAsync(x => x.Key == ConfigurationKeys.ExternalEntityUrl);
+
+        var loginToken = await _configRepository.GetByExpressionAsync(x => x.Key == ConfigurationKeys.ExternalToken);
+
         if (externalEntityUrl is null || externalEntityUrl.Value is null)
         {
             _logger.LogInformation("externalEntityUrl not configured");
             throw new InvalidOperationException("externalEntityUrl not found");
         }
+
+        string token = loginToken.Value;
 
         var url = $"{externalEntityUrl.Value}{entityId}";
         var request = new HttpRequestMessage()
@@ -129,7 +135,7 @@ public class GatewayHandler : IGatewayHandler
             Method = HttpMethod.Get
         };
         request.Headers.Add("ApiKey", _config.GetSection("ApiKey").Value);
-
+        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
         try
         {
             var response = await _client.SendAsync(request);

@@ -13,6 +13,7 @@ public static class ConfigurationKeys
     public const string ExternalLoginData = nameof(ExternalLoginData);
     public const string CardData = nameof(CardData);
     public const string ExternalCardRecordDataUrl = nameof(ExternalCardRecordDataUrl);
+    public const string DisplayKeys = nameof(DisplayKeys);
 
     public static IReadOnlyList<string> DefaultConfigurationKeys { get; } = new ReadOnlyCollection<string>(
     [
@@ -25,7 +26,8 @@ public static class ConfigurationKeys
         ExternalLoginData,
         ExternalCardRecordData,
         ExternalCardRecordDataUrl,
-        ExternalToken
+        ExternalToken,
+        DisplayKeys
     ]);
 
     public static bool IsDefault(string key) => DefaultConfigurationKeys.Any(r => r == key);

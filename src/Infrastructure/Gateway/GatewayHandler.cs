@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Application.Common.Persistence;
 using Domain.Entities;
 using Shared.Configurations;
+using System.Net.Http;
 
 namespace Infrastructure.Gateway;
 public class GatewayHandler : IGatewayHandler
@@ -129,7 +130,7 @@ public class GatewayHandler : IGatewayHandler
             Method = HttpMethod.Get
         };
         request.Headers.Add("ApiKey", _config.GetSection("ApiKey").Value);
-
+        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3OTE3OnRhSm5lZWQiLCJpYXQiOjE3MTgyNTg2OTMsImV4cCI6MTcxODI4MjY5M30.d5gmAdeZyzJaFnZM-H7xfslQFbcQbbzFzp34QAAd-7Z007uFQSIkig0HOV1H2G5Qjg-GlYoXRhY0Jq_S5hFlMg");
         try
         {
             var response = await _client.SendAsync(request);

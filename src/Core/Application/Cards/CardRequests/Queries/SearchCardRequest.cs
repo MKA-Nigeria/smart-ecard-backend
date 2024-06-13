@@ -27,7 +27,7 @@ public class SearchCardRequestHandler(IRepository<CardRequest> repository, IFile
         List<CardRequestDto> cardRequestsDto = [];
         foreach (var cardRequest in cardRequests)
         {
-            //string imageData = await fileStorageService.GetImageDataAsync(cardRequest.CardData.PhotoUrl);
+            string imageData = await fileStorageService.GetImageDataAsync(cardRequest.CardData.PhotoUrl);
 
             var cardRequestDto = new CardRequestDto
             {
@@ -39,7 +39,7 @@ public class SearchCardRequestHandler(IRepository<CardRequest> repository, IFile
 
             cardRequestDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
             cardRequestDto.MemberData.EntityId = cardRequest.ExternalId;
-            cardRequestDto.MemberData.PhotoUrl = null;
+            cardRequestDto.MemberData.PhotoUrl = imageData;
             cardRequestsDto.Add(cardRequestDto);
         }
 

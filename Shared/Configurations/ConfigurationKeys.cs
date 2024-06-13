@@ -5,6 +5,7 @@ public static class ConfigurationKeys
 {
     public const string AppDomain = nameof(AppDomain);
     public const string ExternalLoginUrl = nameof(ExternalLoginUrl);
+    public const string ExternalToken = nameof(ExternalToken);
     public const string ExternalEntityUrl = nameof(ExternalEntityUrl);
     public const string ExternalEntityData = nameof(ExternalEntityData);
     public const string ExternalCardRecordData = nameof(ExternalCardRecordData);
@@ -23,7 +24,8 @@ public static class ConfigurationKeys
         CardData,
         ExternalLoginData,
         ExternalCardRecordData,
-        ExternalCardRecordDataUrl
+        ExternalCardRecordDataUrl,
+        ExternalToken
     ]);
 
     public static bool IsDefault(string key) => DefaultConfigurationKeys.Any(r => r == key);

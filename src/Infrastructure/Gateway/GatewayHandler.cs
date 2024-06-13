@@ -117,10 +117,19 @@ public class GatewayHandler : IGatewayHandler
     public async Task<dynamic> GetEntityAsync(string entityId)
     {
         var externalEntityUrl = await _configRepository.GetByExpressionAsync(x => x.Key == ConfigurationKeys.ExternalEntityUrl);
+
+        var loginToken = await _configRepository.GetByExpressionAsync(x => x.Key == ConfigurationKeys.ExternalToken);
+
         if (externalEntityUrl is null || externalEntityUrl.Value is null)
         {
             _logger.LogInformation("externalEntityUrl not configured");
             throw new InvalidOperationException("externalEntityUrl not found");
+        }
+
+        string token = string.Empty;
+        if(loginToken is null || loginToken.Value is null)
+        {
+            token = loginToken.Value;
         }
 
         var url = $"{externalEntityUrl.Value}{entityId}";
@@ -130,7 +139,7 @@ public class GatewayHandler : IGatewayHandler
             Method = HttpMethod.Get
         };
         request.Headers.Add("ApiKey", _config.GetSection("ApiKey").Value);
-        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI3OTE3OnRhSm5lZWQiLCJpYXQiOjE3MTgyNTg2OTMsImV4cCI6MTcxODI4MjY5M30.d5gmAdeZyzJaFnZM-H7xfslQFbcQbbzFzp34QAAd-7Z007uFQSIkig0HOV1H2G5Qjg-GlYoXRhY0Jq_S5hFlMg");
+        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
         try
         {
             var response = await _client.SendAsync(request);

@@ -126,7 +126,8 @@ internal class ApplicationDbSeeder
             ["ExternalEntityAdditionalData"] = "{\"CheckAdditionalData\": true, \"CheckDataKey\": \"auxillaryBodyName\", \"AdditionalUrl\": {\"Lajna\": \"tytytyt\", \"Ansarullah\": \"ghjkhjh\", \"Khuddam\": \"https://tajneedapi.ahmadiyyanigeria.net/members/\"}, \"Khuddam\": {\"JamaatName\":\"jamaatName\",\"circuitName\":\"circuitName\"}}",
             ["CardData"] = "{\"Organisation\":\"SM\",\"Length\":4}",
             ["ExternalLoginData"] = "{}",
-            ["ExternalToken"] = ""
+            ["ExternalToken"] = "",
+            ["DisplayKeys"] = ""
         };
 
         foreach (string key in ConfigurationKeys.DefaultConfigurationKeys)

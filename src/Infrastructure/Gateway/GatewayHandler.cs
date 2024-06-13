@@ -126,11 +126,7 @@ public class GatewayHandler : IGatewayHandler
             throw new InvalidOperationException("externalEntityUrl not found");
         }
 
-        string token = string.Empty;
-        if(loginToken is null || loginToken.Value is null)
-        {
-            token = loginToken.Value;
-        }
+        string token = loginToken.Value;
 
         var url = $"{externalEntityUrl.Value}{entityId}";
         var request = new HttpRequestMessage()

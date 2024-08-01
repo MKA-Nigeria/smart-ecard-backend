@@ -17,6 +17,7 @@ using ZXing.QrCode;
 using ZXing.Common;
 using SkiaSharp;
 using static QRCoder.QRCodeGenerator;
+using Application.Common.Dtos;
 
 namespace Host.Controllers.Card.Cards;
 public class CardsController : VersionNeutralApiController
@@ -65,7 +66,7 @@ public class CardsController : VersionNeutralApiController
     [HttpGet("{cardNumber}")]
    // [MustHavePermission(AppAction.View, Resource.Card)]
     [OpenApiOperation("Get card requests", "")]
-    public async Task<CardDto> GetAsync(string cardNumber)
+    public async Task<BaseResponse<CardDto>> GetAsync(string cardNumber)
     {
         var response = await Mediator.Send(new GetCardRequest { CardNumber = cardNumber });
         //response.QrCode = GenerateQRCode(response.CardNumber);

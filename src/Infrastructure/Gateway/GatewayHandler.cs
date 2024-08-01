@@ -39,9 +39,23 @@ public class GatewayHandler : IGatewayHandler
             _logger.LogInformation($"ExternalLoginUrl not found");
             throw new Exception($"ExternalLoginUrl not found");
         }
-
+       
         var url = externalLoginUrl.Value;
         var content = new StringContent(JsonConvert.SerializeObject(request), Encoding.UTF8, "application/json");
+        var appDomain = await _configRepository.GetByExpressionAsync(x => x.Key == ConfigurationKeys.AppDomain);
+        if (appDomain is not null && appDomain.Value is not null)
+        {
+            if (appDomain.Value.ToLower() == "mkan")
+            {
+                content = new StringContent(
+                    JsonConvert.SerializeObject(new
+                {
+                        username = request.UserName,
+                        password = request.Password,
+                        domain = "taJneed"
+                    }), Encoding.UTF8, "application/json");
+            }
+        }
         var requestMessage = new HttpRequestMessage();
         requestMessage.RequestUri = new Uri(url);
         requestMessage.Method = HttpMethod.Post;

@@ -51,25 +51,26 @@ internal class TokenService : ITokenService
             {
                 // check external authentication
                 var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
-                LoginResponse loginData;
+               // LoginResponse loginData;
 
                 try
                 {
-                    loginData = JsonConvert.DeserializeObject<dynamic>(loginJsonString);
+                   var loginData = JsonConvert.DeserializeObject<dynamic>(loginJsonString);
+
+
+                   if (loginData != null)
+                    {
+                        string code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                        var result = await _userManager.ResetPasswordAsync(user, code!, request.Password!);
+                    }
+                    else
+                    {
+                        throw new UnauthorizedException("Authentication Failed.");
+                    }
                 }
                 catch (System.Text.Json.JsonException ex)
                 {
                     throw new InvalidCastException($"JSON parsing error: {ex.Message}");
-                }
-
-                if (loginData != null)
-                {
-                    string code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    var result = await _userManager.ResetPasswordAsync(user, code!, request.Password!);
-                }
-                else
-                {
-                    throw new UnauthorizedException("Authentication Failed.");
                 }
             }
         }

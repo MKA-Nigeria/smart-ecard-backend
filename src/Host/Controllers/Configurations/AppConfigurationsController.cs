@@ -3,6 +3,7 @@ using Application.Configurations.Commands;
 using Application.Configurations.Dto;
 using Application.Configurations.Queries;
 using Infrastructure.Auth.Permissions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
 using Shared.Authorization;
@@ -26,6 +27,7 @@ public class AppConfigurationsController : VersionNeutralApiController
         return Mediator.Send(new UpdateAppConfigurationsCommand(request));
     }
 
+    [AllowAnonymous]
     [HttpGet("{key}")]
     //[MustHavePermission(AppAction.Search, Resource.CardRequest)]
     [OpenApiOperation("Get application Configurations settings by key", "")]

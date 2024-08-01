@@ -40,7 +40,7 @@ public class CardRequestsController : VersionNeutralApiController
     [HttpGet("{entityId}")]
     [MustHavePermission(AppAction.View, Resource.CardRequest)]
     [OpenApiOperation("Get card requests", "")]
-    public Task<CardRequestDto> GetAsync(string entityId)
+    public Task<BaseResponse<CardRequestDto>> GetAsync(string entityId)
     {
         return Mediator.Send(new GetCardRequestByExternalId { EntityId = entityId });
     }

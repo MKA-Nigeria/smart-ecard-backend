@@ -32,7 +32,7 @@ public class GetCardRequestHandler(IRepository<CardRequest> repository, IFileSto
         };
         cardRequestDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
         cardRequestDto.MemberData.EntityId = cardRequest.ExternalId;
-        cardRequestDto.MemberData.PhotoUrl = imageData;
+        cardRequestDto.MemberData.PhotoUrl = imageData ?? "";
         return cardRequestDto;
     }
 }

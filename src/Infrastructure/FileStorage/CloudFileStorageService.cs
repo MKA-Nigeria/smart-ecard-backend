@@ -148,7 +148,8 @@ public class CloudFileStorageService(IWebHostEnvironment webHostEnvironment) : I
         }
         catch (Exception ex)
         {
-            throw new Exception($"Failed to retrieve image data: {ex.Message}");
+            //throw new Exception($"Failed to retrieve image data: {ex.Message}");
+            return string.Empty;
         }
     }
 }

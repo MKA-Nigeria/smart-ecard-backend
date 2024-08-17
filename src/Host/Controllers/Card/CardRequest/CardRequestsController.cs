@@ -29,7 +29,7 @@ public class CardRequestsController : VersionNeutralApiController
 
 
     [HttpGet("{id:guid}")]
-    [MustHavePermission(AppAction.View, Resource.CardRequest)]
+    //[MustHavePermission(AppAction.View, Resource.CardRequest)]
     [OpenApiOperation("Get card requests", "")]
     public Task<CardRequestDto> GetAsync(DefaultIdType id)
     {
@@ -38,7 +38,7 @@ public class CardRequestsController : VersionNeutralApiController
 
 
     [HttpGet("{entityId}")]
-    [MustHavePermission(AppAction.View, Resource.CardRequest)]
+    //[MustHavePermission(AppAction.View, Resource.CardRequest)]
     [OpenApiOperation("Get card requests", "")]
     public Task<BaseResponse<CardRequestDto>> GetAsync(string entityId)
     {
@@ -46,7 +46,7 @@ public class CardRequestsController : VersionNeutralApiController
     }
     
     [HttpGet("member/{id}")]
-    [MustHavePermission(AppAction.View, Resource.CardRequest)]
+    //[MustHavePermission(AppAction.View, Resource.CardRequest)]
     [OpenApiOperation("Get member information", "")]
     public Task<BaseResponse<MemberData>> GetMemberDataAsync(string id)
     {

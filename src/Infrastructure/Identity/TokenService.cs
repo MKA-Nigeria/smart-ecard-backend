@@ -15,6 +15,7 @@ using Shared.Authorization;
 using Application.Common.Persistence;
 using Domain.Entities;
 using Shared.Configurations;
+using Newtonsoft.Json.Linq;
 
 namespace Infrastructure.Identity;
 internal class TokenService : ITokenService
@@ -38,112 +39,50 @@ internal class TokenService : ITokenService
         _gatewayHandler = gatewayHandler;
         _configRepo = configRepo;
     }
-
     public async Task<TokenResponse> GetTokenAsync(TokenRequest request, CancellationToken cancellationToken)
     {
         var user = await _userManager.FindByNameAsync(request.UserName.Trim().Normalize());
 
-        if (user is not null)
+        if (user != null)
         {
+            // Validate password
             bool isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
-
             if (!isPasswordValid)
             {
-                // check external authentication
-                var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
-               // LoginResponse loginData;
-
-                try
-                {
-                   var loginData = JsonConvert.DeserializeObject<dynamic>(loginJsonString);
-
-
-                   if (loginData != null)
-                    {
-                        string code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                        var result = await _userManager.ResetPasswordAsync(user, code!, request.Password!);
-                    }
-                    else
-                    {
-                        throw new UnauthorizedException("Authentication Failed.");
-                    }
-                }
-                catch (System.Text.Json.JsonException ex)
-                {
-                    throw new InvalidCastException($"JSON parsing error: {ex.Message}");
-                }
+                await HandleExternalAuthenticationAsync(request, user);
             }
         }
         else
         {
-            dynamic userData;
-            try
+            // Handle the case where the user is not found in the local database
+            user = await CreateUserFromExternalDataAsync(request, cancellationToken);
+        }
+
+        ValidateUser(user);
+
+        return await GenerateTokensAndUpdateUser(user);
+    }
+
+    private async Task HandleExternalAuthenticationAsync(TokenRequest request, ApplicationUser user)
+    {
+        var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
+        if (string.IsNullOrWhiteSpace(loginJsonString))
+        {
+            throw new UnauthorizedException("Authentication Failed.");
+        }
+
+        try
+        {
+            var loginData = JsonConvert.DeserializeObject<dynamic>(loginJsonString);
+
+            if (loginData != null)
             {
-                userData = await _gatewayHandler.GetEntityAsync(request.UserName.Trim().Normalize());
-            }
-            catch (System.Text.Json.JsonException ex)
-            {
-                throw new InvalidCastException($"JSON parsing error: {ex.Message}");
-            }
+                string code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var result = await _userManager.ResetPasswordAsync(user, code!, request.Password!);
 
-            if (userData is not null)
-            {
-                // check external authentication
-                var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request) ?? throw new UnauthorizedException("Invalid credentials");
-                dynamic loginData;
-                try
+                if (!result.Succeeded)
                 {
-                    loginData = JsonConvert.DeserializeObject<dynamic>(loginJsonString);
-                }
-                catch (System.Text.Json.JsonException ex)
-                {
-                    throw new UnauthorizedException("Invalid credentials");
-                }
-
-                var userModelData = await _configRepo.FirstOrDefaultAsync(x => x.Key == ConfigurationKeys.ExternalEntityData, cancellationToken);
-
-                if(userModelData == null || userModelData.Value == null)
-                {
-                    throw new Exception($"Login Model Data not provided");
-                }
-
-
-                // Deserialize the JSON string into a dictionary
-                Dictionary<string, string> keyValuePairs = JsonConvert.DeserializeObject<Dictionary<string, string>>(userModelData.Value);
-
-                if (loginData != null)
-                {
-                    try
-                    {
-                        var newUser = new ApplicationUser
-                        {
-                            Email = userData[keyValuePairs["Email"]],
-                            FirstName = userData[keyValuePairs["FirstName"]],
-                            LastName = userData[keyValuePairs["LastName"]],
-                            UserName = request.UserName,
-                            PhoneNumber = userData[keyValuePairs["PhoneNumber"]],
-                            IsActive = true,
-                            EmailConfirmed = true
-                        };
-
-                        var result = await _userManager.CreateAsync(newUser, request.Password);
-                        if (!result.Succeeded)
-                        {
-                            throw new InternalServerException("Validation Error Occured", errors: result.Errors.Select(x => x.Description).ToList());
-                        }
-
-                        await _userManager.AddToRoleAsync(newUser, Roles.Basic);
-                        user = newUser;
-                    }
-                    catch (KeyNotFoundException ex)
-                    {
-                        // Handle the exception when a key is missing
-                        throw new KeyNotFoundException($"Error creating user: Missing key - {ex.Message}");
-                    }
-                }
-                else
-                {
-                    throw new UnauthorizedException("Authentication Failed.");
+                    throw new InternalServerException("Password reset failed", result.Errors.Select(x => x.Description).ToList());
                 }
             }
             else
@@ -151,7 +90,93 @@ internal class TokenService : ITokenService
                 throw new UnauthorizedException("Authentication Failed.");
             }
         }
+        catch (JsonException ex)
+        {
+            throw new InvalidCastException($"JSON parsing error: {ex.Message}");
+        }
+    }
 
+    private async Task<ApplicationUser> CreateUserFromExternalDataAsync(TokenRequest request, CancellationToken cancellationToken)
+    {
+        dynamic userData;
+        try
+        {
+            userData = await _gatewayHandler.GetEntityAsync(request.UserName.Trim().Normalize());
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidCastException($"JSON parsing error: {ex.Message}");
+        }
+
+        if (userData == null)
+        {
+            throw new UnauthorizedException("Authentication Failed.");
+        }
+
+        var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
+        if (string.IsNullOrWhiteSpace(loginJsonString))
+        {
+            throw new UnauthorizedException("Invalid credentials.");
+        }
+
+        dynamic loginData;
+        try
+        {
+            loginData = JsonConvert.DeserializeObject<dynamic>(loginJsonString);
+        }
+        catch (JsonException)
+        {
+            throw new UnauthorizedException("Invalid credentials.");
+        }
+
+        var userModelData = await _configRepo.FirstOrDefaultAsync(x => x.Key == ConfigurationKeys.ExternalEntityData, cancellationToken);
+        if (userModelData == null || string.IsNullOrWhiteSpace(userModelData.Value))
+        {
+            throw new Exception("Login Model Data not provided.");
+        }
+
+        var keyValuePairs = JsonConvert.DeserializeObject<Dictionary<string, string>>(userModelData.Value);
+        return await CreateUserFromExternalLoginData(request, userData, keyValuePairs, loginData);
+    }
+
+    private async Task<ApplicationUser> CreateUserFromExternalLoginData(TokenRequest request, dynamic userData, Dictionary<string, string> keyValuePairs, dynamic loginData)
+    {
+        if (loginData == null)
+        {
+            throw new UnauthorizedException("Authentication Failed.");
+        }
+
+        try
+        {
+            var newUser = new ApplicationUser
+            {
+                Email = GetValueFromUserData(userData, keyValuePairs["Email"]),
+                FirstName = GetValueFromUserData(userData, keyValuePairs["FirstName"]),
+                LastName = GetValueFromUserData(userData, keyValuePairs["LastName"]),
+                UserName = request.UserName,
+                PhoneNumber = GetValueFromUserData(userData, keyValuePairs["PhoneNumber"]),
+                IsActive = true,
+                EmailConfirmed = true
+            };
+
+            var result = await _userManager.CreateAsync(newUser, request.Password);
+            if (!result.Succeeded)
+            {
+                throw new InternalServerException("Validation Error Occurred", result.Errors.Select(x => x.Description).ToList());
+            }
+
+            await _userManager.AddToRoleAsync(newUser, Roles.Basic);
+
+            return newUser;
+        }
+        catch (KeyNotFoundException ex)
+        {
+            throw new KeyNotFoundException($"Error creating user: Missing key - {ex.Message}");
+        }
+    }
+
+    private void ValidateUser(ApplicationUser user)
+    {
         if (!user.IsActive)
         {
             throw new UnauthorizedException("User Not Active. Please contact the administrator.");
@@ -161,9 +186,152 @@ internal class TokenService : ITokenService
         {
             throw new UnauthorizedException("E-Mail not confirmed.");
         }
-        return await GenerateTokensAndUpdateUser(user);
     }
 
+    /* public async Task<TokenResponse> GetTokenAsync(TokenRequest request, CancellationToken cancellationToken)
+     {
+         var user = await _userManager.FindByNameAsync(request.UserName.Trim().Normalize());
+
+         if (user is not null)
+         {
+             bool isPasswordValid = await _userManager.CheckPasswordAsync(user, request.Password);
+
+             if (!isPasswordValid)
+             {
+                 // check external authentication
+                 var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request);
+                // LoginResponse loginData;
+
+                 try
+                 {
+                    var loginData = JsonConvert.DeserializeObject<dynamic>(loginJsonString);
+
+
+                    if (loginData != null)
+                     {
+                         string code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                         var result = await _userManager.ResetPasswordAsync(user, code!, request.Password!);
+                     }
+                     else
+                     {
+                         throw new UnauthorizedException("Authentication Failed.");
+                     }
+                 }
+                 catch (System.Text.Json.JsonException ex)
+                 {
+                     throw new InvalidCastException($"JSON parsing error: {ex.Message}");
+                 }
+             }
+         }
+         else
+         {
+             dynamic userData;
+             try
+             {
+                 userData = await _gatewayHandler.GetEntityAsync(request.UserName.Trim().Normalize());
+             }
+             catch (System.Text.Json.JsonException ex)
+             {
+                 throw new InvalidCastException($"JSON parsing error: {ex.Message}");
+             }
+
+             if (userData is not null)
+             {
+                 // check external authentication
+                 var loginJsonString = await _gatewayHandler.ExternalLoginAsync(request) ?? throw new UnauthorizedException("Invalid credentials");
+                 dynamic loginData;
+                 try
+                 {
+                     loginData = JsonConvert.DeserializeObject<dynamic>(loginJsonString);
+                 }
+                 catch (System.Text.Json.JsonException ex)
+                 {
+                     throw new UnauthorizedException("Invalid credentials");
+                 }
+
+                 var userModelData = await _configRepo.FirstOrDefaultAsync(x => x.Key == ConfigurationKeys.ExternalEntityData, cancellationToken);
+
+                 if(userModelData == null || userModelData.Value == null)
+                 {
+                     throw new Exception($"Login Model Data not provided");
+                 }
+
+
+                 // Deserialize the JSON string into a dictionary
+                 Dictionary<string, string> keyValuePairs = JsonConvert.DeserializeObject<Dictionary<string, string>>(userModelData.Value);
+
+                 if (loginData != null)
+                 {
+                     try
+                     {
+                         var newUser = new ApplicationUser
+                         {
+                             Email = userData[keyValuePairs["Email"]],
+                             FirstName = userData[keyValuePairs["FirstName"]],
+                             LastName = userData[keyValuePairs["LastName"]],
+                             UserName = request.UserName,
+                             PhoneNumber = userData[keyValuePairs["PhoneNumber"]],
+                             IsActive = true,
+                             EmailConfirmed = true
+                         };
+
+                         var result = await _userManager.CreateAsync(newUser, request.Password);
+                         if (!result.Succeeded)
+                         {
+                             throw new InternalServerException("Validation Error Occured", errors: result.Errors.Select(x => x.Description).ToList());
+                         }
+
+                         await _userManager.AddToRoleAsync(newUser, Roles.Basic);
+                         user = newUser;
+                     }
+                     catch (KeyNotFoundException ex)
+                     {
+                         // Handle the exception when a key is missing
+                         throw new KeyNotFoundException($"Error creating user: Missing key - {ex.Message}");
+                     }
+                 }
+                 else
+                 {
+                     throw new UnauthorizedException("Authentication Failed.");
+                 }
+             }
+             else
+             {
+                 throw new UnauthorizedException("Authentication Failed.");
+             }
+         }
+
+         if (!user.IsActive)
+         {
+             throw new UnauthorizedException("User Not Active. Please contact the administrator.");
+         }
+
+         if (_securitySettings.RequireConfirmedAccount && !user.EmailConfirmed)
+         {
+             throw new UnauthorizedException("E-Mail not confirmed.");
+         }
+         return await GenerateTokensAndUpdateUser(user);
+     }*/
+
+    string GetValueFromUserData(dynamic userData, string keyPath)
+    {
+        var keys = keyPath.Split('.');
+        dynamic currentValue = userData;
+
+        foreach (var key in keys)
+        {
+            if (currentValue is JObject && currentValue[key] != null)
+            {
+                currentValue = currentValue[key];
+            }
+            else
+            {
+                throw new KeyNotFoundException($"Key '{key}' not found in userData.");
+            }
+        }
+
+        return (string)currentValue;
+    }
     public async Task<TokenResponse> RefreshTokenAsync(RefreshTokenRequest request, string ipAddress)
     {
         var userPrincipal = GetPrincipalFromExpiredToken(request.Token);
@@ -267,18 +435,3 @@ internal class TokenService : ITokenService
     }
 }
 
-public class LoginResponse
-{
-    public LoginData Data { get; set; }
-    public string Token { get; set; }
-    public string Expiry { get; set; }
-    public string Message { get; set; }
-    public bool Status { get; set; }
-}
-
-public class LoginData
-{
-    public int UserId { get; set; }
-    public string UserName { get; set; }
-    public List<string> Roles { get; set; }
-}

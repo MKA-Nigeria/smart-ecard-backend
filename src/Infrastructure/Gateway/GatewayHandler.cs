@@ -52,7 +52,7 @@ public class GatewayHandler : IGatewayHandler
                 {
                         username = request.UserName,
                         password = request.Password,
-                        domain = "taJneed"
+                        //domain = "taJneed"
                     }), Encoding.UTF8, "application/json");
             }
         }

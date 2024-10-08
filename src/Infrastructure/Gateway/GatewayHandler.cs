@@ -150,7 +150,7 @@ public class GatewayHandler : IGatewayHandler
         };
 
         //request.Headers.Add("ApiKey", _config.GetSection("ApiKey").Value);
-        _client.DefaultRequestHeaders.Add("apiKey", $"Bearer {token}");
+        _client.DefaultRequestHeaders.Add("apiKey", $"{token}");
         try
         {
             var response = await _client.SendAsync(request);

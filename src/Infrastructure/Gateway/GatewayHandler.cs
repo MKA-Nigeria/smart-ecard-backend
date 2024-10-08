@@ -148,8 +148,9 @@ public class GatewayHandler : IGatewayHandler
             RequestUri = new Uri(url),
             Method = HttpMethod.Get
         };
-        request.Headers.Add("ApiKey", _config.GetSection("ApiKey").Value);
-        _client.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+
+        //request.Headers.Add("ApiKey", _config.GetSection("ApiKey").Value);
+        _client.DefaultRequestHeaders.Add("apiKey", $"Bearer {token}");
         try
         {
             var response = await _client.SendAsync(request);

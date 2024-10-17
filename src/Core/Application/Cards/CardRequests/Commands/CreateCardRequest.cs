@@ -47,8 +47,8 @@ public class CreateCardRequestHandler(IRepository<CardRequest> repository, IRepo
             throw new ForbiddenException("The member has an active card");
         }
 
-        var existingCardRequest = await _repository.FirstOrDefaultAsync(x => x.ExternalId == request.ExternalId);
-        if(existingCardRequest != null && (existingCardRequest.Status != CardRequestStatus.Rejected || existingCardRequest.Status != CardRequestStatus.Cancelled))
+        var existingCardRequest = await _repository.FirstOrDefaultAsync(x => x.ExternalId == request.ExternalId, cancellationToken);
+        if (existingCardRequest != null && (existingCardRequest.Status != CardRequestStatus.Rejected && existingCardRequest.Status != CardRequestStatus.Cancelled))
         {
             throw new ForbiddenException("The member has a pending card request");
         }

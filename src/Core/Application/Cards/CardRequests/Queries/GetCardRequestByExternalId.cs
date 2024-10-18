@@ -1,5 +1,8 @@
 ﻿using Application.Cards.CardRequests.Queries.Dto;
+using Application.Cards.Cards.Dto;
 using Application.Common.Dtos;
+using Application.Common.FileStorage;
+using Domain.Cards;
 using Domain.Enums;
 using Mapster;
 
@@ -8,7 +11,7 @@ public class GetCardRequestByExternalId : IRequest<BaseResponse<CardRequestDto>>
 {
     public string EntityId { get; set; } = default!;
 }
-public class GetCardRequestByExternalIdHandler(IRepository<CardRequest> repository) : IRequestHandler<GetCardRequestByExternalId, BaseResponse<CardRequestDto>>
+public class GetCardRequestByExternalIdHandler(IRepository<CardRequest> repository, IFileStorageService fileStorageService) : IRequestHandler<GetCardRequestByExternalId, BaseResponse<CardRequestDto>>
 {
     public async Task<BaseResponse<CardRequestDto>> Handle(GetCardRequestByExternalId request, CancellationToken cancellationToken)
     {
@@ -23,6 +26,8 @@ public class GetCardRequestByExternalIdHandler(IRepository<CardRequest> reposito
             //use logging
             //throw new Exception($"No card request for {request.EntityId}");
         }
+
+        string imageData = await fileStorageService.GetImageDataAsync(cardRequest.CardData.PhotoUrl);
         var cardRequestDto = new CardRequestDto
         {
             MemberData = cardRequest.CardData.Adapt<MemberData>(),
@@ -32,6 +37,7 @@ public class GetCardRequestByExternalIdHandler(IRepository<CardRequest> reposito
         };
         cardRequestDto.MemberData.CustomData = cardRequest.CustomData.ToDictionary();
         cardRequestDto.MemberData.EntityId = cardRequest.ExternalId;
+        cardRequestDto.MemberData.PhotoUrl = imageData ?? null;
         return new BaseResponse<CardRequestDto>
         {
             Data = cardRequestDto,

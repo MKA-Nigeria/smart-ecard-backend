@@ -1,5 +1,4 @@
-﻿using Application.Lookups.Dtos;
-using Domain.Entities;
+﻿using Domain.Entities;
 
 namespace Application.Lookups.Commands;
 public class CreateLookupCommand : IRequest<DefaultIdType>

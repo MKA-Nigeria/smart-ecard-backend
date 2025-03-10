@@ -15,7 +15,6 @@ using Infrastructure.Auth;
 using Infrastructure.Persistence;
 using MediatR;
 using Infrastructure.Common;
-using Infrastructure.Auth;
 using Infrastructure.BackgroundJobs;
 using Infrastructure.Mailing;
 using Infrastructure.FileStorage;
@@ -36,11 +35,13 @@ public static class Startup
             .AddCaching(config)
             .AddCorsPolicy(config)
             .AddExceptionMiddleware()
-            //.AddBehaviours(applicationAssembly)
+
+            // .AddBehaviours(applicationAssembly)
             .AddHealthCheck()
             .AddMailing(config)
             .AddMediatR(Assembly.GetExecutingAssembly())
-             //.AddNotifications(config)
+
+            // .AddNotifications(config)
             .AddOpenApiDocumentation(config)
             .AddPersistence()
             .AddRequestLogging(config)

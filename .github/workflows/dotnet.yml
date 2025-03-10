@@ -41,27 +41,4 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-          
-            # Stop existing container
-            docker container stop ecardapi-prod nginx-prod
-             
-            # Remove existing container
-            docker container prune -f
-           
-            # Remove existing image
-            docker image rm adyemisworld/ecardapi:latest -f
-            docker system prune -f
-            
-            # Create new network and start new containers with Nginx and SSL
-            docker network create ecardnetwork
-            
-            docker run -d --name ecardapi-prod --network ecardnetwork adyemisworld/ecardapi
-            
-            docker run -d --name nginx-prod --network ecardnetwork \
-              -p 80:80 -p 443:443 \
-              -v /etc/ssl/certs:/etc/ssl/certs \
-              -v /etc/ssl/private:/etc/ssl/private \
-              -v /etc/nginx:/etc/nginx \
-              nginx:alpine
-            
-            docker image prune -f
+            bash /opt/deploy.sh ecardapi

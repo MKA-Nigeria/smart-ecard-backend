@@ -8,6 +8,7 @@ using System.Net.Http.Headers;
 namespace Infrastructure.BackgroundJobs;
 public class HangfireCustomBasicAuthenticationFilter : IDashboardAuthorizationFilter
 {
+    // Avoid magic strings
     private const string _AuthenticationScheme = "Basic";
     private readonly ILogger _logger;
     public string User { get; set; } = default!;

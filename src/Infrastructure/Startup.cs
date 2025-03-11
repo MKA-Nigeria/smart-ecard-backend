@@ -42,6 +42,7 @@ public static class Startup
             .AddMediatR(Assembly.GetExecutingAssembly())
 
             // .AddNotifications(config)
+
             .AddOpenApiDocumentation(config)
             .AddPersistence()
             .AddRequestLogging(config)

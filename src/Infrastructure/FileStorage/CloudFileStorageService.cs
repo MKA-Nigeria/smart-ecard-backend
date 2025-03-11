@@ -116,11 +116,10 @@ public class CloudFileStorageService(IWebHostEnvironment webHostEnvironment) : I
     {
         var bunnyCDNStorage = new BunnyCDNStorage(_storageZoneName, _accessKey, _region);
 
-        using (var fileStream = System.IO.File.OpenWrite(downloadPath))
-        {
-            await bunnyCDNStorage.DownloadObjectAsStreamAsync(fileName);
-            //await bunnyCDNStorage.DownloadObjectAsStreamAsync("/storagezonename/helloworld.txt");
-        }
+        using var fileStream = System.IO.File.OpenWrite(downloadPath);
+        await bunnyCDNStorage.DownloadObjectAsStreamAsync(fileName);
+
+        // await bunnyCDNStorage.DownloadObjectAsStreamAsync("/storagezonename/helloworld.txt");
     }
 
     public async Task<string> GetImageDataAsync(string imagePath)
@@ -130,25 +129,22 @@ public class CloudFileStorageService(IWebHostEnvironment webHostEnvironment) : I
         try
         {
             // Download the image as a stream from BunnyCDN
-            using (var stream = await bunnyCDNStorage.DownloadObjectAsStreamAsync(imagePath))
+            using var stream = await bunnyCDNStorage.DownloadObjectAsStreamAsync(imagePath);
+            if (stream == null)
             {
-                if (stream == null)
-                {
-                    return null;
-                }
-
-                // Read the stream and convert it to byte array
-                using (var memoryStream = new MemoryStream())
-                {
-                    await stream.CopyToAsync(memoryStream);
-                    // Convert byte array to base64 string
-                    return Convert.ToBase64String(memoryStream.ToArray());
-                }
+                return null;
             }
+
+            // Read the stream and convert it to byte array
+            using var memoryStream = new MemoryStream();
+            await stream.CopyToAsync(memoryStream);
+
+            // Convert byte array to base64 string
+            return Convert.ToBase64String(memoryStream.ToArray());
         }
         catch (Exception ex)
         {
-            //throw new Exception($"Failed to retrieve image data: {ex.Message}");
+            // throw new Exception($"Failed to retrieve image data: {ex.Message}");
             return string.Empty;
         }
     }

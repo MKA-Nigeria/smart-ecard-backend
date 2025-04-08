@@ -1,6 +1,6 @@
 {
   "DatabaseSettings": {
     "DBProvider": "mssql",
-    "ConnectionString": "Data Source=108.166.181.227;Database=NewEcardDB;User Id=sa;Password=T@jneed2024;TrustServerCertificate=True",
+    "ConnectionString": "Data Source=108.166.181.227;Database=NewEcardDB;User Id=sa;Password=T@jneed2025;TrustServerCertificate=True",
   }
 }
